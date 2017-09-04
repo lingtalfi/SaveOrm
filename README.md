@@ -401,6 +401,10 @@ Related
 History Log
 ------------------    
     
+- 1.1.0 -- 2017-09-04
+
+    - the second argument of the addXXX auto-generated method is now optional 
+    
 - 1.0.1 -- 2017-09-04
 
     - fix SaveOrmGenerator algorithm for finding children

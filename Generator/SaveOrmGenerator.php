@@ -734,6 +734,7 @@ class SaveOrmGenerator
         $s = '' . PHP_EOL;
         $sp = str_repeat(' ', 4);
         $sp2 = str_repeat(' ', 8);
+        $sp3 = str_repeat(' ', 12);
 
         foreach ($colsInfo as $col => $info) {
 
@@ -762,9 +763,14 @@ class SaveOrmGenerator
                     $objectHint = rtrim($hint, '[]');
                     $s .= $objectHint . ' ';
                     $s .= '$' . $info['singular'] . ', ';
-                    $s .= $info['middleClass'] . ' $' . $info['middleProp'];
+                    $s .= $info['middleClass'] . ' $' . $info['middleProp'] . ' = null';
                     $s .= ')' . PHP_EOL;
                     $s .= $sp . '{' . PHP_EOL;
+
+                    $s .= $sp2 . 'if (null === $' . $info['middleProp'] . ') {' . PHP_EOL;
+                    $s .= $sp3 . '$' . $info['middleProp'] . ' = ' . $info['middleClass'] . '::create();' . PHP_EOL;
+                    $s .= $sp2 . '}' . PHP_EOL;
+
                     $s .= $sp2 . '$this->' . $col . '[] = $' . $info['singular'] . ';' . PHP_EOL;
                     $s .= $sp2 . '$' . $info['singular'] . '->_has_ = $' . $info['middleProp'] . ';' . PHP_EOL;
                     $s .= $sp2 . 'return $this;' . PHP_EOL;
@@ -772,7 +778,6 @@ class SaveOrmGenerator
                     $s .= PHP_EOL;
                     break;
                 default:
-
                     $s .= OrmToolsHelper::renderSetMethod($col, $hint);
                     break;
             }
@@ -791,7 +796,7 @@ class SaveOrmGenerator
             if (is_array($filters)) {
                 $ret = [];
                 foreach ($filters as $filter) {
-                    if (false === strpos($filter, '*')) {
+                    if (false === strpos($filter, ' * ')) {
                         $ret[] = $filter;
                     } else {
                         $pattern = '!' . $filter . '!';
