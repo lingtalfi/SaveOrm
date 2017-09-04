@@ -16,6 +16,8 @@ class CoumeGeneratedBaseObject extends Object
 
     public function save()
     {
-        GeneratedObjectManager::create()->save($this);
+        $om = GeneratedObjectManager::create();
+        $om->save($this);
+        return $om->getSaveResults();
     }
 }

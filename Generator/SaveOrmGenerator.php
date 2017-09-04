@@ -556,7 +556,7 @@ class SaveOrmGenerator
 
 
             $content = str_replace([
-                'CourseObject',
+                'OOCourseObject',
                 'GENERATEDObject',
                 'SaveOrm\Object\Ekev',
                 '// use',
@@ -610,7 +610,7 @@ class SaveOrmGenerator
         $confTplFile = __DIR__ . "/templates/Conf.tpl.php";
         $confTplContent = file_get_contents($confTplFile);
         $content = str_replace([
-            'CourseObject',
+            'OOCourseObject',
             'SaveOrm\Object\Ekev',
             '[]',
         ], [

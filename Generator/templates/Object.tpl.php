@@ -7,7 +7,7 @@ namespace SaveOrm\Object\Ekev;
 // use
 
 
-class CourseObject extends GENERATEDObject
+class OOCourseObject extends GENERATEDObject
 {
 
 }

@@ -4,7 +4,7 @@
 namespace SaveOrm\Object\Ekev;
 
 
-class CourseObject
+class OOCourseObject
 {
 
     static $conf = [];
