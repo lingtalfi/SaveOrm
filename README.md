@@ -484,6 +484,10 @@ Related
 History Log
 ------------------    
     
+- 1.9.0 -- 2017-09-04
+
+    - update ObjectManager now injecting into guests (bindings) only for non changed properties 
+    
 - 1.8.0 -- 2017-09-04
 
     - fix SaveOrmGenerator not generating bindings key in conf    

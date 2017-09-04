@@ -98,7 +98,6 @@ class ObjectManager
         $allPrefixes = (array_key_exists('tablePrefixes', $generalConfig)) ? $generalConfig['tablePrefixes'] : [];
 
 
-
         //--------------------------------------------
         // SIBLINGS FIRST
         //--------------------------------------------
@@ -205,10 +204,8 @@ class ObjectManager
                 $method = $this->getMethodByTable('get', $guestTable, $allPrefixes);
 
 
-
                 $guestObject = $object->$method();
                 if (null !== $guestObject) {
-
 
                     // pass the newly created host data to the guest object
                     $guestInfo = $this->getInstanceInfo($guestObject);
@@ -217,10 +214,17 @@ class ObjectManager
                     list($foreignKey, $referencedKey) = $fkInfo;
 
 
-                    $getMethod = $this->getMethodByProperty('get', $referencedKey);
-                    $setMethod = $this->getMethodByProperty('set', $foreignKey);
-                    $value = $object->$getMethod();
-                    $guestObject->$setMethod($value);
+                    /**
+                     * Injection, only if the value hasn't been set manually (or by using a createByXXX method)
+                     */
+                    $guestChangedProps = $guestObject->_getChangedProperties();
+                    if (!in_array($foreignKey, $guestChangedProps)) {
+                        $getMethod = $this->getMethodByProperty('get', $referencedKey);
+                        $setMethod = $this->getMethodByProperty('set', $foreignKey);
+                        $value = $object->$getMethod();
+                        $guestObject->$setMethod($value);
+                    }
+
 
                     $ret2 = $this->doSave($guestObject);
                     $this->_saveResults[$guestTable] = $ret2;
@@ -378,7 +382,6 @@ class ObjectManager
         $primaryKey = $options['pk'];
         $table = $options['table'];
         $ric = $options['ric'];
-
 
         $isCreate = true;
         if (null !== $ai) {
