@@ -54,7 +54,7 @@ class SaveOrmGenerator
             $this->carriageReturn = '<br>';
         }
 
-//        $this->focus = "TABLE 69";
+//        $this->focus = "ekev_presenter_group";
     }
 
 
@@ -114,6 +114,7 @@ class SaveOrmGenerator
             $this->_reversedFKeys = $this->prepareReverseForeignKeys($databases);
             $this->_childrenArray = $this->getChildrenArray($databases);
             $this->_bindings = $this->prepareBindings($this->_reversedFKeys, $this->_childrenArray);
+
 
             $tableFilters = $this->getConfValue('tables', []);
             foreach ($databases as $database) {
@@ -218,6 +219,7 @@ class SaveOrmGenerator
                             $left = $this->stripTablePrefixes($left);
                             $right = $this->stripTablePrefixes($right);
 
+
                             /**
                              * we want the longest to be the first, in
                              * case the shortest is contained in the longest, thus
@@ -234,17 +236,18 @@ class SaveOrmGenerator
                             $leftTable = null;
                             $rightTable = null;
                             $fks = QuickPdoInfoTool::getForeignKeysInfo($table, $db);
-                            $foundCol = null;
+                            $foundCols = [];
                             foreach ($both as $side) {
                                 foreach ($fks as $col => $fkInfo) {
-                                    if ($foundCol !== $col) {
+                                    if (!in_array($col, $foundCols)) {
                                         if (false !== strpos($fkInfo[1], $side)) {
                                             $sides[$side] = [$fkInfo[0], $fkInfo[1], $col];
-                                            $foundCol = $col;
+                                            $foundCols[] = $col;
                                         }
                                     }
                                 }
                             }
+
 
                             if (2 === count($sides)) {
                                 $ret[$sides[$left][0] . '.' . $sides[$left][1]][] = [
@@ -261,7 +264,6 @@ class SaveOrmGenerator
                             }
                         }
                     }
-
                 }
             }
         }
@@ -434,8 +436,8 @@ class SaveOrmGenerator
         $ids = $databases;
         $ids[] = '_children_'; // databases is already used as an identifier by another method...
 
+        return $this->doGetChildrenArray($databases);
         return $this->tryFromCache($ids, function () use ($databases) {
-            return $this->doGetChildrenArray($databases);
         });
     }
 
