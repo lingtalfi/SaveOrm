@@ -26,8 +26,11 @@ Or just download it and place it where you want otherwise.
 
 About the conception
 ===================
-Please read the documents in the **doc** directory of this repository.
 
+
+Every call to the **save** method triggers an atomic transaction that either fails or succeeds. 
+
+Please read the documents in the **doc** directory of this repository for more info.
 
 
 How to use the generator
