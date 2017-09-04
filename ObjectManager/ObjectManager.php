@@ -88,7 +88,6 @@ class ObjectManager
         $info = $this->getInstanceInfo($object);
         $generalConfig = $this->getGeneralConfig();
         $table = $info['table'];
-        $tablePrefix = $info['prefix'];
         $properties = $info['properties'];
         $foreignKeys = $info['fks'];
         $ai = $info['ai'];
@@ -97,6 +96,7 @@ class ObjectManager
         $bindings = (array_key_exists('bindings', $info)) ? $info['bindings'] : [];
         $childrenTables = (array_key_exists('childrenTables', $info)) ? $info['childrenTables'] : [];
         $allPrefixes = (array_key_exists('tablePrefixes', $generalConfig)) ? $generalConfig['tablePrefixes'] : [];
+
 
 
         //--------------------------------------------
@@ -202,7 +202,8 @@ class ObjectManager
             foreach ($bindings as $guestLink) {
                 list($guestDb, $guestLink) = explode('.', $guestLink);
                 list($guestTable, $guestColumn) = $this->getLinkInfo($guestLink);
-                $method = $this->getMethodByTable('get', $guestTable, $tablePrefix);
+                $method = $this->getMethodByTable('get', $guestTable, $allPrefixes);
+
 
 
                 $guestObject = $object->$method();

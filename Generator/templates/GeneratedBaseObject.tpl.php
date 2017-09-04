@@ -13,11 +13,12 @@ class CoumeGeneratedBaseObject extends Object
 
     private $_savedResults;
 
-    public function save()
+    public function save(array &$savedResults = [])
     {
         $om = GeneratedObjectManager::create();
         $ret = $om->save($this);
-        $this->_savedResults = $om->getSaveResults();
+        $savedResults = $om->getSaveResults();
+        $this->_savedResults = $savedResults;
         return $ret;
     }
 

@@ -578,6 +578,8 @@ class SaveOrmGenerator
         if (false === $ai) {
             $ai = null;
         }
+
+
         $unit = [
             'table' => $table,
             'prefix' => $this->getUsedPrefix($table, $tablePrefixes),
@@ -585,6 +587,7 @@ class SaveOrmGenerator
             'fks' => $this->formatForeignKeys($info->getForeignKeys()),
             'ai' => $ai,
             'primaryKey' => $info->getPrimaryKey(),
+            'bindings' => $info->getBindings(),
 
         ];
         $ric = $this->getRic($database, $table);

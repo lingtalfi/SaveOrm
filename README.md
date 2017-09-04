@@ -484,6 +484,11 @@ Related
 History Log
 ------------------    
     
+- 1.8.0 -- 2017-09-04
+
+    - fix SaveOrmGenerator not generating bindings key in conf    
+    - GeneratedBaseObject.save method now has an optional savedResults referenced argument    
+    
 - 1.7.0 -- 2017-09-04
 
     - createByXXX generated methods now have their last argument: $fail defaulting to the new option: false    
