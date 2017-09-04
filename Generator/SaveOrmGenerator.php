@@ -54,7 +54,7 @@ class SaveOrmGenerator
             $this->carriageReturn = '<br>';
         }
 
-        $this->focus = "ek_product_card";
+//        $this->focus = "ek_product_card";
     }
 
 
