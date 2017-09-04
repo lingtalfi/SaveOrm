@@ -137,7 +137,7 @@ class ObjectManager
 
             // unresolved foreign keys?
             if (true === $this->isForeignKey($prop, $foreignKeys) && null === $value) {
-                $this->saveError("Unresolved foreign key for column $prop");
+                $this->saveError("Unresolved foreign key for table $table, column $prop");
             }
             $values[$prop] = $value;
         }
@@ -173,8 +173,8 @@ class ObjectManager
 
             // filtering values, we only update the properties that the user set manually
             $changedProps = $object->_getChangedProperties();
-            $values = array_intersect_key($values, array_flip($changedProps));
-            QuickPdo::update($table, $values, $pdoWhere);
+            $updateValues = array_intersect_key($values, array_flip($changedProps));
+            QuickPdo::update($table, $updateValues, $pdoWhere);
         }
 
         //--------------------------------------------
@@ -340,7 +340,7 @@ class ObjectManager
     private function saveError($msg)
     {
         $class = get_class($this->_savedObject);
-        throw new SaveException("Problem with save $class: $msg");
+        throw new SaveException("Problem with saving $class: $msg");
     }
 
     private function getPascal($word)

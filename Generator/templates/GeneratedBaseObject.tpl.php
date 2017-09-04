@@ -8,16 +8,22 @@ use SaveOrm\Object\Object;
 use SaveOrm\Test\GeneratedObjectManager;
 
 
-
-
 class CoumeGeneratedBaseObject extends Object
 {
 
+    private $_savedResults;
 
     public function save()
     {
         $om = GeneratedObjectManager::create();
-        $om->save($this);
-        return $om->getSaveResults();
+        $ret = $om->save($this);
+        $this->_savedResults = $om->getSaveResults();
+        return $ret;
+    }
+
+
+    public function getSaveResults()
+    {
+        return $this->_savedResults;
     }
 }

@@ -484,6 +484,11 @@ Related
 History Log
 ------------------    
     
+- 1.6.0 -- 2017-09-04
+
+    - add GeneratedBaseObject.getSaveResults method    
+    - change GeneratedBaseObject.save method returns the same as the ObjectManager.save method    
+    
 - 1.5.0 -- 2017-09-04
 
     - now save method handle update only for the set properties  
