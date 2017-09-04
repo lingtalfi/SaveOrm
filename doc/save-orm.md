@@ -286,6 +286,70 @@ actual database :)
 
 
 
+Just for fun, here is an ensemble of objects which creates a record in every table of the schema:
+
+```php
+
+A::quickPdoInit(); // initialize your db object, depends on the framework you are using, I'm using kamille
+
+
+// ekev_presenter_group
+$shopId = 1;
+$uniqueString = date("Y-m-d H:i:s"); // just to ensure being in insert mode (avoid duplicate error after a refresh)
+$countryObj = CountryObject::createByIsoCode("FR");
+
+
+$event = EventObject::create()
+    ->setName("paul" . $uniqueString)
+    ->setStartDate("2017-12-12")
+    ->setEndDate("2017-12-14")
+    ->setLocationId(1)
+    ->setShopId($shopId)
+    ->createEventLang(EventLangObject::create()
+        ->setLangId(1)
+        ->setEventId(1)
+        ->setLabel("salon vert")
+    )
+    ->setLocation(LocationObject::create()
+        ->setLabel("Location of myriam" . $uniqueString)
+        ->setAddress("45 rue rue")
+        ->setCountryId(1)
+        ->setShopId($shopId)
+        ->addHotel(HotelObject::create()
+            ->setLabel("Hôtel des paquerettes" . $uniqueString)
+            ->setAddress("85 bd mouille")
+            ->setCity("Banlieue")
+            ->setPostcode("85000")
+            ->setShopId($shopId)
+            ->setCountry($countryObj))
+    )
+    ->addCourse(CourseObject::create()
+        ->setShopId($shopId)
+        ->setName("the course 1" . $uniqueString),
+        EventHasCourseObject::create()
+            ->setDate("2017-09-01")
+            ->setStartTime("13h00")
+            ->setEndTime("14h00")
+            ->setPresenterGroupId(7)
+            ->setCapacity(20)
+            ->setPresenterGroup(PresenterGroupObject::create()
+                ->setName("MyPresenterGroup" . $uniqueString)
+                ->setShopId($shopId)
+                ->addPresenter(PresenterObject::create()->setPseudo("Amélie" . $uniqueString)->setShopId($shopId))// create
+                ->addPresenter(PresenterObject::create()->setPseudo("Boris" . $uniqueString)->setShopId($shopId)) // create
+            )
+        ->addParticipant(ParticipantObject::create()
+            ->setEmail("maji@gmail.com" . $uniqueString)
+            ->setCountry($countryObj)
+        )
+    );
+
+
+a($event->save());
+```
+
+
+
 
 
 
