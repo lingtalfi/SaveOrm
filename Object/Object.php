@@ -9,9 +9,18 @@ namespace SaveOrm\Object;
  */
 class Object
 {
+    protected $changedProperties = [];
 
     public static function create()
     {
         return new static();
     }
+
+
+    public function _getChangedProperties()
+    {
+        return $this->changedProperties;
+    }
+
 }
+

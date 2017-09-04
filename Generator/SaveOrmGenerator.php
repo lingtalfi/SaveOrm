@@ -790,7 +790,9 @@ class SaveOrmGenerator
                     $s .= PHP_EOL;
                     break;
                 default:
-                    $s .= OrmToolsHelper::renderSetMethod($col, $hint);
+                    $s .= OrmToolsHelper::renderSetMethod($col, $hint, 'set', [
+                        'beginning' => $sp2 . '$this->changedProperties[] = "' . $col . '";' . PHP_EOL,
+                    ]);
                     break;
             }
 

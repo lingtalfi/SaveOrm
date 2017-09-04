@@ -254,6 +254,44 @@ MyTableObject::create()
 ```
 
 
+Note: the update method only updates the properties that you set with the setXXX methods.
+
+That's because this is most of the time the desired behaviour; imagine for instance a shop object with the following columns and values:
+ 
+
+- id: 1
+- label: mooo
+- host: domain.com
+- lang_id: 1
+- currency_id: 2
+- timezone_id: 134
+
+Now, imagine this code:
+
+```php
+ShopObject::create()
+    ->setId(1)
+    ->setLabel("dooo")
+    ->save();
+```
+
+What you expect is that the label becomes "dooo", but you don't want the other properties to change.
+If they did change, they would be set to their default values and you would end up with the following, which is
+non-sense:
+
+- id; 1
+- label: dooo
+- host: (empty string)
+- lang_id: 0
+- currency_id: 0
+- timezone_id: 0
+
+
+
+
+
+
+
 ### Mixing insert and update
 
 SaveOrm is smart enough to detect whether an insert or an update should be performed for each object.
@@ -445,6 +483,10 @@ Related
 
 History Log
 ------------------    
+    
+- 1.5.0 -- 2017-09-04
+
+    - now save method handle update only for the set properties  
     
 - 1.4.0 -- 2017-09-04
 

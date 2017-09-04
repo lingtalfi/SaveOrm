@@ -170,6 +170,10 @@ class ObjectManager
             }
         } else {
             $pdoWhere = QuickPdoStmtHelper::simpleWhereToPdoWhere($where);
+
+            // filtering values, we only update the properties that the user set manually
+            $changedProps = $object->_getChangedProperties();
+            $values = array_intersect_key($values, array_flip($changedProps));
             QuickPdo::update($table, $values, $pdoWhere);
         }
 
