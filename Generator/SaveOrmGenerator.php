@@ -54,7 +54,7 @@ class SaveOrmGenerator
             $this->carriageReturn = '<br>';
         }
 
-//        $this->focus = "ekev_presenter_group";
+        $this->focus = "ek_product_card";
     }
 
 
@@ -345,20 +345,17 @@ class SaveOrmGenerator
     {
         $ret = $reversedFKeys;
 
-        $boundaries = [];
+        $middles = [];
         foreach ($children as $left => $allInfo) {
             foreach ($allInfo as $info) {
-                $right = $info[1];
-                $boundaries[] = $left;
-                $boundaries[] = $right;
+                $middles[] = $info[0];
             }
         }
-        $boundaries = array_unique($boundaries);
-
+        $middles = array_unique($middles);
 
         foreach ($ret as $col => $tables) {
             foreach ($tables as $k => $table) {
-                if (in_array($table, $boundaries)) {
+                if (in_array($table, $middles)) {
                     unset($ret[$col][$k]);
                 }
             }
@@ -436,8 +433,8 @@ class SaveOrmGenerator
         $ids = $databases;
         $ids[] = '_children_'; // databases is already used as an identifier by another method...
 
-        return $this->doGetChildrenArray($databases);
         return $this->tryFromCache($ids, function () use ($databases) {
+            return $this->doGetChildrenArray($databases);
         });
     }
 

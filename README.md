@@ -404,6 +404,10 @@ Related
 History Log
 ------------------    
     
+- 1.3.0 -- 2017-09-04
+
+    - change SaveOrmGenerator for finding bindings (now cannot be a middle table, but a left/right table is ok) 
+    
 - 1.2.0 -- 2017-09-04
 
     - createByXXX generated methods now accept a third argument: $fail=true 

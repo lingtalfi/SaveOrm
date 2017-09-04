@@ -141,7 +141,7 @@ The binding relationship
 ---------------------------
 
 In a binding relationship, a guest table has a foreign key referencing a host table.
-The guest table cannot be the right boundary (the right table) of a children relationship (explained in the next section).
+The guest table cannot be the middle table of a children relationship (explained in the next section).
  
 Note: this constraint is actually an experimental rule, and could be removed on the future, we will see...
 
