@@ -634,6 +634,7 @@ class SaveOrmGenerator
         $sp = str_repeat(' ', 4);
         $sp2 = str_repeat(' ', 8);
         $sp3 = str_repeat(' ', 12);
+        $sp4 = str_repeat(' ', 16);
 
         $cols = [];
         $vars = [];
@@ -657,9 +658,16 @@ class SaveOrmGenerator
 
                 $fnName = 'createBy' . implode('', $pascals);
                 $s .= $sp . 'public static function ' . $fnName . '(';
-                $s .= implode(', ', $vars) . ')' . PHP_EOL;
+                $s .= implode(', ', $vars) . ', $fail = true)' . PHP_EOL;
                 $s .= $sp . '{' . PHP_EOL;
                 $s .= $sp2 . '$ret = self::create();' . PHP_EOL;
+
+                $s .= $sp2 . '$params = [' . PHP_EOL;
+                foreach ($cols as $col) {
+                    $s .= $sp3 . "'$col' => \$$col," . PHP_EOL;
+                }
+                $s .= $sp2 . '];' . PHP_EOL;
+
                 $s .= $sp2 . '$row = QuickPdo::fetch("select * from `' . $table . '` where ';
                 $c = 0;
                 foreach ($cols as $col) {
@@ -668,16 +676,23 @@ class SaveOrmGenerator
                     }
                     $s .= '`' . $col . '`=:' . $col;
                 }
-                $s .= '", [' . PHP_EOL;
-                foreach ($cols as $col) {
-                    $s .= $sp3 . "'$col' => \$$col," . PHP_EOL;
-                }
-                $s .= $sp2 . ']);' . PHP_EOL;
+                $s .= '", $params);' . PHP_EOL;
+                $s .= $sp2 . 'if (false !== $row) {' . PHP_EOL;
                 foreach ($columns as $col) {
                     $pascal = CaseTool::snakeToFlexiblePascal($col);
-                    $s .= $sp2 . '$ret->set' . $pascal . '($row["' . $col . '"]);' . PHP_EOL;
+                    $s .= $sp3 . '$ret->set' . $pascal . '($row["' . $col . '"]);' . PHP_EOL;
                 }
+                $s .= $sp2 . '} else {' . PHP_EOL;
 
+                $s .= $sp3 . '$table = "' . $table . '";' . PHP_EOL;
+
+                $s .= $sp3 . 'if (true === $fail) {' . PHP_EOL;
+                $s .= $sp4 . 'throw new \Exception("Could not create the $table object with parameters " . ArrayToStringTool::toPhpArray($params));' . PHP_EOL;
+                $s .= $sp3 . '} elseif (is_callable($fail)) {' . PHP_EOL;
+                $s .= $sp4 . 'call_user_func($fail, $ret, $table, $params);' . PHP_EOL;
+                $s .= $sp3 . '}' . PHP_EOL;
+
+                $s .= $sp2 . '}' . PHP_EOL;
                 $s .= $sp2 . 'return $ret;' . PHP_EOL;
                 $s .= $sp . '}' . PHP_EOL;
                 $s .= PHP_EOL;
