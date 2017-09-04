@@ -233,13 +233,22 @@ class SaveOrmGeneratorInfo
 
         $tablePrefixes = $this->getConfValue('tablePrefixes', []);
         $baseNamespace = $this->getConfValue('baseNamespace');
-        $relativePath = SaveOrmGeneratorHelper::getObjectRelativePath($table, $tablePrefixes);
+        $usedPrefix = null;
+        $relativePath = SaveOrmGeneratorHelper::getObjectRelativePath($table, $tablePrefixes, $usedPrefix);
         $useRelativePath = str_replace('/', '\\', $relativePath);
         $usePath = $baseNamespace . "\\Object\\" . $useRelativePath;
         $p = explode('/', $relativePath);
         $class = array_pop($p);
         $table = $this->stripTablePrefixes($table, $tablePrefixes);
         $prop = $table;
+
+        if (null !== $usedPrefix) {
+            $prefix = SaveOrmGeneratorHelper::toPascal($usedPrefix);
+            $class = $prefix . $class;
+            $p = explode('\\', $usePath);
+            $newUsePath = array_pop($p);
+            $usePath .= ' as ' . $prefix . $newUsePath;
+        }
 
         return [$prop, $class, $usePath];
 

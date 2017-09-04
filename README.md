@@ -390,6 +390,48 @@ UserObject::createByEmailShopId("email@gmail.com", 1);
 
 
 
+Known limitations
+=====================
+
+If you use multiple prefixes, chances that at some point you will have method name conflicts.
+
+For instance, ek_user and ecc_user should perhaps lead to different methods, for instance:
+
+- setEkUser
+- setEccUser
+
+
+But SaveOrm doesn't differentiate between those and provide a single method:
+
+- setUser
+
+This is because if SaveOrm tried to deal with prefixes, it should also rename all properties and
+the end result could be confusing to the SaveOrm user.
+
+Therefore, if this problem happens to you, the recommended workaround is to create the necessary method
+in the userland class.
+
+So for instance if you see the problem in your Ek/GeneratedUserObject class,
+then you can fix it in the corresponding Ek/UserObject class, by creating a new method, like this for instance:
+
+
+```php 
+public function setEccUser(EccUserObject $user){
+    $this->eccUser = $user;
+    return $this;
+}
+```
+
+Also, you will need to create the eccUser property.  
+
+
+
+
+
+
+
+
+
 
 
 Related
@@ -403,6 +445,11 @@ Related
 
 History Log
 ------------------    
+    
+- 1.4.0 -- 2017-09-04
+
+    - add third argument to SaveOrmGeneratorHelper.getObjectRelativePath method (usedPrefix)  
+    - add alias support  
     
 - 1.3.0 -- 2017-09-04
 
