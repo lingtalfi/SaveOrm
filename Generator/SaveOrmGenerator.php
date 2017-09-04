@@ -655,7 +655,7 @@ class SaveOrmGenerator
 
                 $fnName = 'createBy' . implode('', $pascals);
                 $s .= $sp . 'public static function ' . $fnName . '(';
-                $s .= implode(', ', $vars) . ', $fail = true)' . PHP_EOL;
+                $s .= implode(', ', $vars) . ', $fail = false)' . PHP_EOL;
                 $s .= $sp . '{' . PHP_EOL;
                 $s .= $sp2 . '$ret = self::create();' . PHP_EOL;
 
@@ -685,6 +685,11 @@ class SaveOrmGenerator
 
                 $s .= $sp3 . 'if (true === $fail) {' . PHP_EOL;
                 $s .= $sp4 . 'throw new \Exception("Could not create the $table object with parameters " . ArrayToStringTool::toPhpArray($params));' . PHP_EOL;
+                $s .= $sp3 . '} elseif (false === $fail) {' . PHP_EOL;
+                foreach ($cols as $col) {
+                    $pascal = CaseTool::snakeToFlexiblePascal($col);
+                    $s .= $sp4 . '$ret->set' . $pascal . '($' . $col . ');' . PHP_EOL;
+                }
                 $s .= $sp3 . '} elseif (is_callable($fail)) {' . PHP_EOL;
                 $s .= $sp4 . 'call_user_func($fail, $ret, $table, $params);' . PHP_EOL;
                 $s .= $sp3 . '}' . PHP_EOL;

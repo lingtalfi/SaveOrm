@@ -484,6 +484,10 @@ Related
 History Log
 ------------------    
     
+- 1.7.0 -- 2017-09-04
+
+    - createByXXX generated methods now have their last argument: $fail defaulting to the new option: false    
+    
 - 1.6.0 -- 2017-09-04
 
     - add GeneratedBaseObject.getSaveResults method    
