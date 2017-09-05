@@ -97,6 +97,7 @@ class ObjectManager
         $bindings = (array_key_exists('bindings', $info)) ? $info['bindings'] : [];
         $childrenTables = (array_key_exists('childrenTables', $info)) ? $info['childrenTables'] : [];
         $allPrefixes = (array_key_exists('tablePrefixes', $generalConfig)) ? $generalConfig['tablePrefixes'] : [];
+        $changedProps = $object->_getChangedProperties();
 
 
         //--------------------------------------------
@@ -154,6 +155,7 @@ class ObjectManager
         $isCreate = $this->isCreate([
             'ai' => $ai,
             'values' => $values,
+            'changedProps' => $changedProps,
             'pk' => $primaryKey,
             'table' => $table,
             'uniqueIndexes' => $uniqueIndexes,
@@ -164,6 +166,7 @@ class ObjectManager
         //--------------------------------------------
         // NOW SAVE
         //--------------------------------------------
+        a($table, $isCreate);
         if (true === $isCreate) {
             $ret = QuickPdo::insert($table, $values);
             if (null !== $ai && false !== $ret) {
@@ -173,27 +176,36 @@ class ObjectManager
             $pdoWhere = QuickPdoStmtHelper::simpleWhereToPdoWhere($where);
 
             // filtering values, we only update the properties that the user set manually
-            $changedProps = $object->_getChangedProperties();
+
             $updateValues = array_intersect_key($values, array_flip($changedProps));
             QuickPdo::update($table, $updateValues, $pdoWhere);
         }
 
         //--------------------------------------------
-        // RETURN VALUE & INJECTION
+        // RETURN VALUE
         //--------------------------------------------
         $ret = null;
         if (null !== $ai) {
             $ret = $values[$ai];
-            $setter = $this->getMethodByProperty('set', $ai);
-            $object->$setter($ret);
         } elseif (count($primaryKey) > 0) {
             $ret = array_intersect_key($values, array_flip($primaryKey));
+        } elseif (count($uniqueIndexes) > 0) {
+            $ret = array_intersect_key($values, array_flip($uniqueIndexes));
         } elseif (count($ric) > 0) {
-            $ret = array_intersect_key($ric, array_flip($primaryKey));
+            $ret = array_intersect_key($values, array_flip($ric));
         } else {
             $ret = $values;
         }
         $this->_saveResults[$table] = $ret;
+
+        //--------------------------------------------
+        // INJECTION
+        //--------------------------------------------
+        a($values);
+        foreach ($values as $k => $v) {
+            $setter = $this->getMethodByProperty('set', $k);
+            $object->$setter($v);
+        }
 
 
         //--------------------------------------------
@@ -224,10 +236,12 @@ class ObjectManager
                         $getMethod = $this->getMethodByProperty('get', $referencedKey);
                         $setMethod = $this->getMethodByProperty('set', $foreignKey);
                         $value = $object->$getMethod();
+                        a("val", $value);
                         $guestObject->$setMethod($value);
                     }
 
 
+                    a($table, $guestTable);
                     $ret2 = $this->doSave($guestObject);
                     $this->_saveResults[$guestTable] = $ret2;
                 }
@@ -390,26 +404,32 @@ class ObjectManager
         $table = $options['table'];
         $ric = $options['ric'];
         $uniqueIndexes = $options['uniqueIndexes'];
+        $changedProps = $options['changedProps'];
+
 
 
         $isCreate = true;
         if (null !== $ai) {
             if (null === $values[$ai]) {
                 $isCreate = true;
+                $this->registerIsCreate("ai=null", $table, $isCreate);
             } else {
                 $isCreate = (false === $this->existByColumns([$ai], $values, $table, $where));
+                $this->registerIsCreate("ai found", $table, $isCreate);
             }
         }
 
         if (true === $isCreate) {
             if (count($primaryKey) > 0) {
                 $isCreate = (false === $this->existByColumns($primaryKey, $values, $table, $where));
+                $this->registerIsCreate("pk found", $table, $isCreate);
             }
             if (true === $isCreate) {
                 if (count($uniqueIndexes) > 0) {
                     foreach ($uniqueIndexes as $uniqueIndex) {
                         $isCreate = (false === $this->existByColumns($uniqueIndex, $values, $table, $where));
                         if (false === $isCreate) {
+                            $this->registerIsCreate("uk found", $table, $isCreate);
                             break;
                         }
                     }
@@ -417,14 +437,22 @@ class ObjectManager
                 if (true === $isCreate) {
                     if (count($ric) > 0) {
                         $isCreate = (false === $this->existByColumns($ric, $values, $table, $where));
+                        $this->registerIsCreate("ric found", $table, $isCreate);
                     }
                     if (true === $isCreate) {
                         $isCreate = (false === $this->existByColumns(array_keys($values), $values, $table, $where));
+                        $this->registerIsCreate("wild record found", $table, $isCreate);
                     }
                 }
             }
         }
         return $isCreate;
+    }
+
+    private function registerIsCreate($type, $table, $isCreate)
+    {
+        $sCreate = ($isCreate) ? 'true' : 'false';
+        a("isCreate: $table=$sCreate ($type)");
     }
 
     private function getMethodByTable($methodPrefix, $table, $tablePrefix)
