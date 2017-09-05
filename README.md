@@ -484,6 +484,10 @@ Related
 History Log
 ------------------    
     
+- 1.11.0 -- 2017-09-05
+
+    - revisited save method with two modes: insert/update
+    
 - 1.10.0 -- 2017-09-05
 
     - update ObjectManager.save method algorithm for determining whether to insert/update, now uses uniqueIndexes 

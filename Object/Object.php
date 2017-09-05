@@ -9,7 +9,10 @@ namespace SaveOrm\Object;
  */
 class Object
 {
-    protected $changedProperties = [];
+    protected $_changedProperties = [];
+    protected $_mode = 'insert';
+    protected $_where = [];
+    protected $_whereSuccess = false;
 
     public static function create()
     {
@@ -17,9 +20,14 @@ class Object
     }
 
 
-    public function _getChangedProperties()
+    public function _getManagerInfo()
     {
-        return $this->changedProperties;
+        return [
+            'changedProperties' => $this->_changedProperties,
+            'mode' => $this->_mode,
+            'where' => $this->_where,
+            'whereSuccess' => $this->_whereSuccess,
+        ];
     }
 
 }

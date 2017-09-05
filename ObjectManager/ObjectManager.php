@@ -97,7 +97,7 @@ class ObjectManager
         $bindings = (array_key_exists('bindings', $info)) ? $info['bindings'] : [];
         $childrenTables = (array_key_exists('childrenTables', $info)) ? $info['childrenTables'] : [];
         $allPrefixes = (array_key_exists('tablePrefixes', $generalConfig)) ? $generalConfig['tablePrefixes'] : [];
-        $changedProps = $object->_getChangedProperties();
+        $managerInfo = $object->_getManagerInfo();
 
 
         //--------------------------------------------
@@ -151,34 +151,30 @@ class ObjectManager
         //--------------------------------------------
         // CREATE OR UPDATE?
         //--------------------------------------------
-        $where = [];
-        $isCreate = $this->isCreate([
-            'ai' => $ai,
-            'values' => $values,
-            'changedProps' => $changedProps,
-            'pk' => $primaryKey,
-            'table' => $table,
-            'uniqueIndexes' => $uniqueIndexes,
-            'ric' => $ric,
-        ], $where);
+        $isCreate = ('insert' === $managerInfo['mode']);
+        $whereSuccess = $managerInfo['whereSuccess'];
 
 
         //--------------------------------------------
         // NOW SAVE
         //--------------------------------------------
-        a($table, $isCreate);
-        if (true === $isCreate) {
+        if (
+            true === $isCreate ||
+            (false === $isCreate && false === $whereSuccess)
+        ) {
             $ret = QuickPdo::insert($table, $values);
             if (null !== $ai && false !== $ret) {
                 $values[$ai] = (int)$ret;
             }
         } else {
+            $where = $managerInfo['where'];
             $pdoWhere = QuickPdoStmtHelper::simpleWhereToPdoWhere($where);
 
             // filtering values, we only update the properties that the user set manually
-
+            $changedProps = $managerInfo['changedProperties'];
             $updateValues = array_intersect_key($values, array_flip($changedProps));
             QuickPdo::update($table, $updateValues, $pdoWhere);
+
         }
 
         //--------------------------------------------
@@ -199,9 +195,8 @@ class ObjectManager
         $this->_saveResults[$table] = $ret;
 
         //--------------------------------------------
-        // INJECTION
+        // INJECTION (I don't remember why this is necessary)
         //--------------------------------------------
-        a($values);
         foreach ($values as $k => $v) {
             $setter = $this->getMethodByProperty('set', $k);
             $object->$setter($v);
@@ -236,12 +231,9 @@ class ObjectManager
                         $getMethod = $this->getMethodByProperty('get', $referencedKey);
                         $setMethod = $this->getMethodByProperty('set', $foreignKey);
                         $value = $object->$getMethod();
-                        a("val", $value);
                         $guestObject->$setMethod($value);
                     }
 
-
-                    a($table, $guestTable);
                     $ret2 = $this->doSave($guestObject);
                     $this->_saveResults[$guestTable] = $ret2;
                 }
@@ -407,7 +399,6 @@ class ObjectManager
         $changedProps = $options['changedProps'];
 
 
-
         $isCreate = true;
         if (null !== $ai) {
             if (null === $values[$ai]) {
@@ -449,11 +440,6 @@ class ObjectManager
         return $isCreate;
     }
 
-    private function registerIsCreate($type, $table, $isCreate)
-    {
-        $sCreate = ($isCreate) ? 'true' : 'false';
-        a("isCreate: $table=$sCreate ($type)");
-    }
 
     private function getMethodByTable($methodPrefix, $table, $tablePrefix)
     {

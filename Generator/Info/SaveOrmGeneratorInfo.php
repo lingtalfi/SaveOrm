@@ -24,6 +24,7 @@ class SaveOrmGeneratorInfo
     private $bindings;
     private $children;
     private $ai;
+    private $ric;
 
     //
     private $prepared;
@@ -43,6 +44,7 @@ class SaveOrmGeneratorInfo
         //
         $this->bindings = [];
         $this->children = [];
+        $this->ric = [];
     }
 
     public static function create($database, $table)
@@ -128,6 +130,16 @@ class SaveOrmGeneratorInfo
     }
 
 
+    /**
+     * @return array
+     */
+    public function getRic()
+    {
+        $this->prepare();
+        return $this->ric;
+    }
+
+
 
 
 
@@ -145,6 +157,10 @@ class SaveOrmGeneratorInfo
             $this->ai = QuickPdoInfoTool::getAutoIncrementedField($this->table, $this->database);
             $this->foreignKeys = QuickPdoInfoTool::getForeignKeysInfo($this->table, $this->database);
             $this->primaryKey = QuickPdoInfoTool::getPrimaryKey($this->table, $this->database);
+            $rics = $this->getConfValue('ric', []);
+            if (array_key_exists($fullTable, $rics)) {
+                $this->ric = $rics[$fullTable];
+            }
 
 
             $statements = [];

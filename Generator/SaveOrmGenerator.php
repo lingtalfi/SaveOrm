@@ -471,7 +471,6 @@ class SaveOrmGenerator
         //--------------------------------------------
         // PREPARING INFORMATION
         //--------------------------------------------
-
         $tablePrefixes = $this->getConfValue('tablePrefixes', []);
         $relativePath = SaveOrmGeneratorHelper::getObjectRelativePath($table, $tablePrefixes);
         $elements = explode('/', $relativePath);
@@ -504,11 +503,24 @@ class SaveOrmGenerator
         $sAccessors = $this->computeAccessors($colsInfo);
         $sUse = OrmToolsHelper::renderStatements($info->getStatements());
 
+
+        //--------------------------------------------
+        // GENERATING
+        //--------------------------------------------
         $sCreateBy = '';
         $uniqueIndexes = QuickPdoInfoTool::getUniqueIndexes($database . "." . $table);
+
+
         if (count($uniqueIndexes) > 0) {
-            $sCreateBy = $this->renderCreateByMethod($table, $info->getObjectProperties(), $uniqueIndexes);
+            $uniqueSets = $uniqueIndexes;
+            $uniqueSets[] = $info->getPrimaryKey();
+            $ric = $info->getRic();
+            if (count($ric) > 0) {
+                $uniqueSets[] = $ric;
+            }
+            $sCreateBy = $this->renderCreateByMethod($table, $info->getObjectProperties(), $uniqueSets);
         }
+
 
         //--------------------------------------------
         // GENERATING GENERATED OBJECTS
@@ -629,7 +641,7 @@ class SaveOrmGenerator
     }
 
 
-    private function renderCreateByMethod($table, array $columns, array $uniqueIndexes)
+    private function renderCreateByMethod($table, array $columns, array $uniqueSets)
     {
         $s = '';
         $sp = str_repeat(' ', 4);
@@ -637,11 +649,8 @@ class SaveOrmGenerator
         $sp3 = str_repeat(' ', 12);
         $sp4 = str_repeat(' ', 16);
 
-        $cols = [];
-        $vars = [];
-        $pascals = [];
 
-        if ($uniqueIndexes) {
+        if ($uniqueSets) {
 
 
             $s .= PHP_EOL;
@@ -649,8 +658,13 @@ class SaveOrmGenerator
             $s .= $sp . '//' . PHP_EOL;
             $s .= $sp . '//--------------------------------------------' . PHP_EOL;
 
-            foreach ($uniqueIndexes as $uniqueIndex) {
-                foreach ($uniqueIndex as $column) {
+            foreach ($uniqueSets as $uniqueSet) {
+                $cols = [];
+                $vars = [];
+                $pascals = [];
+
+
+                foreach ($uniqueSet as $column) {
                     $cols[] = $column;
                     $vars[] = '$' . $column;
                     $pascals[] = CaseTool::snakeToFlexiblePascal($column);
@@ -659,15 +673,17 @@ class SaveOrmGenerator
 
                 $fnName = 'createBy' . implode('', $pascals);
                 $s .= $sp . 'public static function ' . $fnName . '(';
-                $s .= implode(', ', $vars) . ', $fail = false)' . PHP_EOL;
+                $s .= implode(', ', $vars) . ')' . PHP_EOL;
                 $s .= $sp . '{' . PHP_EOL;
                 $s .= $sp2 . '$ret = self::create();' . PHP_EOL;
+                $s .= $sp2 . '$ret->_mode = \'update\';' . PHP_EOL;
 
                 $s .= $sp2 . '$params = [' . PHP_EOL;
                 foreach ($cols as $col) {
                     $s .= $sp3 . "'$col' => \$$col," . PHP_EOL;
                 }
                 $s .= $sp2 . '];' . PHP_EOL;
+                $s .= $sp2 . '$ret->_where = $params;' . PHP_EOL;
 
                 $s .= $sp2 . '$row = QuickPdo::fetch("select * from `' . $table . '` where ';
                 $c = 0;
@@ -683,21 +699,14 @@ class SaveOrmGenerator
                     $pascal = CaseTool::snakeToFlexiblePascal($col);
                     $s .= $sp3 . '$ret->set' . $pascal . '($row["' . $col . '"]);' . PHP_EOL;
                 }
+                $s .= $sp3 . '$ret->_whereSuccess = true;' . PHP_EOL;
+
                 $s .= $sp2 . '} else {' . PHP_EOL;
-
-                $s .= $sp3 . '$table = "' . $table . '";' . PHP_EOL;
-
-                $s .= $sp3 . 'if (true === $fail) {' . PHP_EOL;
-                $s .= $sp4 . 'throw new \Exception("Could not create the $table object with parameters " . ArrayToStringTool::toPhpArray($params));' . PHP_EOL;
-                $s .= $sp3 . '} elseif (false === $fail) {' . PHP_EOL;
                 foreach ($cols as $col) {
                     $pascal = CaseTool::snakeToFlexiblePascal($col);
-                    $s .= $sp4 . '$ret->set' . $pascal . '($' . $col . ');' . PHP_EOL;
+                    $s .= $sp3 . '$ret->set' . $pascal . '($' . $col . ');' . PHP_EOL;
                 }
-                $s .= $sp3 . '} elseif (is_callable($fail)) {' . PHP_EOL;
-                $s .= $sp4 . 'call_user_func($fail, $ret, $table, $params);' . PHP_EOL;
-                $s .= $sp3 . '}' . PHP_EOL;
-
+                $s .= $sp3 . '$ret->_whereSuccess = false;' . PHP_EOL;
                 $s .= $sp2 . '}' . PHP_EOL;
                 $s .= $sp2 . 'return $ret;' . PHP_EOL;
                 $s .= $sp . '}' . PHP_EOL;
@@ -800,7 +809,7 @@ class SaveOrmGenerator
                     break;
                 default:
                     $s .= OrmToolsHelper::renderSetMethod($col, $hint, 'set', [
-                        'beginning' => $sp2 . '$this->changedProperties[] = "' . $col . '";' . PHP_EOL,
+                        'beginning' => $sp2 . '$this->_changedProperties[] = "' . $col . '";' . PHP_EOL,
                     ]);
                     break;
             }
