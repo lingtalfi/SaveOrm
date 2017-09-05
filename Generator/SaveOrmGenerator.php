@@ -54,7 +54,7 @@ class SaveOrmGenerator
             $this->carriageReturn = '<br>';
         }
 
-//        $this->focus = "ek_product_card_lang";
+//        $this->focus = "ek_product_lang";
     }
 
 
@@ -384,13 +384,6 @@ class SaveOrmGenerator
         return $table;
     }
 
-    private function hasForeignKeyPointTo($fullTable1, $fullTable2)
-    {
-        return (
-            array_key_exists($fullTable2, $this->_reversedFKeys) &&
-            in_array($fullTable1, $this->_reversedFKeys[$fullTable2])
-        );
-    }
 
     private function getBindings($db, $table)
     {
@@ -505,21 +498,23 @@ class SaveOrmGenerator
 
 
         //--------------------------------------------
-        // GENERATING
+        // GENERATING CREATE BY METHOD
         //--------------------------------------------
         $sCreateBy = '';
+        $uniqueSets = [];
         $uniqueIndexes = QuickPdoInfoTool::getUniqueIndexes($database . "." . $table);
-
-
         if (count($uniqueIndexes) > 0) {
             $uniqueSets = $uniqueIndexes;
-            $uniqueSets[] = $info->getPrimaryKey();
-            $ric = $info->getRic();
-            if (count($ric) > 0) {
-                $uniqueSets[] = $ric;
-            }
-            $sCreateBy = $this->renderCreateByMethod($table, $info->getObjectProperties(), $uniqueSets);
         }
+        $_pk = $info->getPrimaryKey();
+        if (count($_pk) > 0) {
+            $uniqueSets[] = $_pk;
+        }
+        $ric = $info->getRic();
+        if (count($ric) > 0) {
+            $uniqueSets[] = $ric;
+        }
+        $sCreateBy = $this->renderCreateByMethod($table, $info->getObjectProperties(), $uniqueSets);
 
 
         //--------------------------------------------
