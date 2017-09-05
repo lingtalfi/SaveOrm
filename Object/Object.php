@@ -19,6 +19,15 @@ class Object
         return new static();
     }
 
+    public static function createUpdate()
+    {
+        $o = new static();
+        $o->_mode = 'update';
+        $o->_whereSuccess = null;
+        $o->_where = null;
+        return $o;
+    }
+
 
     public function _getManagerInfo()
     {

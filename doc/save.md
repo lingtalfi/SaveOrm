@@ -171,6 +171,74 @@ which means it either succeeds, or fails (duplicate error) and throws an excepti
  
  
  
+But, sometimes value is missing...
+===================================
+
+Our approach so far is not too bad and allows us to handle a few cases.
+
+However, it doesn't handle the case where you want to be in update mode,
+but one value is missing, and the value you need could be inferred.
+
+Let's have a look at this example code below,
+and focus on the $productIdNotYetAvailable variable.
+
+```php
+ProductObject::createByReference('product_ref')
+    ->setPrice(200)
+    ->createProductLang(ProductLangObject::createByProductIdLangId($productIdNotYetAvailable, $lang->getId())
+        ->setLabel("the product label")
+    )
+    ->save();
+```
+
+
+What I want to explain in this code is that there is a ProductObject, with a binding
+to the ProductLangObject.
+
+What we want is to be able to refresh the page without our code throwing exception.
+
+For that, we want our two objects to be in update mode (hence the use of the createByXXX methods on both objects).
+
+So, when we save the ProductObject, it will save the original object first (relationship priorities), and then the binding (the
+ProductLangObject). 
+
+However, we don't have access to the product id until the save method is called, and therefore our 
+$productIdNotYetAvailable variable is undefined.
+
+Too sad, we were so close to have our code nice and functional.
+
+But since this problem might be recurrent, SaveOrm has a workaround for this: the createUpdate method.
+
+The createUpdate method is like the create method, but triggers the update mode.
+By the time the SaveOrm ask our ProductLangObject to resolve, it has already injected the product id to it.
+
+Here is the workaround:
+
+
+```php
+ProductObject::createByReference('product_ref')
+    ->setPrice(200)
+    ->createProductLang(ProductLangObject::createUpdate()
+        ->setLangId($lang->getId())
+        ->setLabel("the product label")
+    )
+    ->save();
+```
+
+So again, the createUpdate method triggers the ProductLangObject into update mode,
+plus, since the ProductLang is a guest binding, it will receive the ProductObject.id value automatically
+(i.e. ProductLang->setProductId is called with the appropriate value).
+
+
+ 
+
+
+
+
+
+
+Conclusion
+=============
  
 So, that's it.
 Hopefully this approach makes sense and you can get accustomed to it.

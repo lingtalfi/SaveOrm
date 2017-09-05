@@ -9,7 +9,6 @@ use OrmTools\Helper\OrmToolsHelper;
 use QuickPdo\QuickPdo;
 use QuickPdo\QuickPdoStmtTool;
 use SaveOrm\Exception\SaveException;
-use SaveOrm\Object\Object;
 use XiaoApi\Helper\QuickPdoStmtHelper\QuickPdoStmtHelper;
 
 class ObjectManager
@@ -168,6 +167,13 @@ class ObjectManager
             }
         } else {
             $where = $managerInfo['where'];
+
+
+            if (null === $where) { // createUpdate
+                $identifiers = $this->getMostRelevantIdentifiers($info);
+                $where = array_intersect_key($values, array_flip($identifiers));
+            }
+
             $pdoWhere = QuickPdoStmtHelper::simpleWhereToPdoWhere($where);
 
             // filtering values, we only update the properties that the user set manually
@@ -226,7 +232,8 @@ class ObjectManager
                     /**
                      * Injection, only if the value hasn't been set manually (or by using a createByXXX method)
                      */
-                    $guestChangedProps = $guestObject->_getChangedProperties();
+                    $guestInfo = $guestObject->_getManagerInfo();
+                    $guestChangedProps = $guestInfo['changedProperties'];
                     if (!in_array($foreignKey, $guestChangedProps)) {
                         $getMethod = $this->getMethodByProperty('get', $referencedKey);
                         $setMethod = $this->getMethodByProperty('set', $foreignKey);
@@ -309,6 +316,19 @@ class ObjectManager
             $p[1] = null;
         }
         return $p;
+    }
+
+
+    private function getMostRelevantIdentifiers(array $info)
+    {
+        if (null !== $info['ai']) {
+            return $info['ai'];
+        } elseif (count($info['primaryKey']) > 0) {
+            return $info['primaryKey'];
+        } elseif (count($info['uniqueIndexes']) > 0) {
+            return $info['uniqueIndexes'];
+        }
+        return $info['properties'];
     }
 
 

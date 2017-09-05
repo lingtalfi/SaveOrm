@@ -484,6 +484,10 @@ Related
 History Log
 ------------------    
     
+- 1.12.0 -- 2017-09-05
+
+    - add Object::createUpdate method
+    
 - 1.11.1 -- 2017-09-05
 
     - fixed SaveOrmGenerator generating only createByXXX methods for unique indexes problem
