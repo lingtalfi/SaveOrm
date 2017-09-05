@@ -91,6 +91,7 @@ class ObjectManager
         $properties = $info['properties'];
         $foreignKeys = $info['fks'];
         $ai = $info['ai'];
+        $uniqueIndexes = $info['uniqueIndexes'];
         $primaryKey = $info['primaryKey'];
         $ric = (array_key_exists('ric', $info)) ? $info['ric'] : [];
         $bindings = (array_key_exists('bindings', $info)) ? $info['bindings'] : [];
@@ -155,6 +156,7 @@ class ObjectManager
             'values' => $values,
             'pk' => $primaryKey,
             'table' => $table,
+            'uniqueIndexes' => $uniqueIndexes,
             'ric' => $ric,
         ], $where);
 
@@ -362,7 +364,12 @@ class ObjectManager
      */
     private function existByColumns(array $cols, array $values, $table, array &$where = [])
     {
-        $where = array_intersect_key($values, array_flip($cols));
+        $where = [];
+        foreach ($values as $k => $v) {
+            if (in_array($k, $cols)) {
+                $where[$k] = $v;
+            }
+        }
         $anyField = current($cols);
         $q = "select `$anyField` from " . $table;
         $markers = [];
@@ -382,6 +389,8 @@ class ObjectManager
         $primaryKey = $options['pk'];
         $table = $options['table'];
         $ric = $options['ric'];
+        $uniqueIndexes = $options['uniqueIndexes'];
+
 
         $isCreate = true;
         if (null !== $ai) {
@@ -390,12 +399,30 @@ class ObjectManager
             } else {
                 $isCreate = (false === $this->existByColumns([$ai], $values, $table, $where));
             }
-        } elseif (count($primaryKey) > 0) {
-            $isCreate = (false === $this->existByColumns($primaryKey, $values, $table, $where));
-        } elseif (count($ric) > 0) {
-            $isCreate = (false === $this->existByColumns($ric, $values, $table, $where));
-        } else {
-            $isCreate = (false === $this->existByColumns(array_values($values), $values, $table, $where));
+        }
+
+        if (true === $isCreate) {
+            if (count($primaryKey) > 0) {
+                $isCreate = (false === $this->existByColumns($primaryKey, $values, $table, $where));
+            }
+            if (true === $isCreate) {
+                if (count($uniqueIndexes) > 0) {
+                    foreach ($uniqueIndexes as $uniqueIndex) {
+                        $isCreate = (false === $this->existByColumns($uniqueIndex, $values, $table, $where));
+                        if (false === $isCreate) {
+                            break;
+                        }
+                    }
+                }
+                if (true === $isCreate) {
+                    if (count($ric) > 0) {
+                        $isCreate = (false === $this->existByColumns($ric, $values, $table, $where));
+                    }
+                    if (true === $isCreate) {
+                        $isCreate = (false === $this->existByColumns(array_keys($values), $values, $table, $where));
+                    }
+                }
+            }
         }
         return $isCreate;
     }

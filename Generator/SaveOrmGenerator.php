@@ -54,7 +54,7 @@ class SaveOrmGenerator
             $this->carriageReturn = '<br>';
         }
 
-//        $this->focus = "ek_shop";
+//        $this->focus = "ek_product_card_lang";
     }
 
 
@@ -585,6 +585,7 @@ class SaveOrmGenerator
             'prefix' => $this->getUsedPrefix($table, $tablePrefixes),
             'properties' => $info->getObjectProperties(),
             'fks' => $this->formatForeignKeys($info->getForeignKeys()),
+            'uniqueIndexes' => $uniqueIndexes,
             'ai' => $ai,
             'primaryKey' => $info->getPrimaryKey(),
             'bindings' => $info->getBindings(),

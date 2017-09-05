@@ -484,6 +484,10 @@ Related
 History Log
 ------------------    
     
+- 1.10.0 -- 2017-09-05
+
+    - update ObjectManager.save method algorithm for determining whether to insert/update, now uses uniqueIndexes 
+    
 - 1.9.0 -- 2017-09-04
 
     - update ObjectManager now injecting into guests (bindings) only for non changed properties 

@@ -81,6 +81,7 @@ Here are the properties we will need for every object:
 - foreignKeys: array of foreign key column => \[referenced table, referenced column]
 - autoIncremented: null|str, the name of the auto-incremented column if any
 - primaryKey: array representing the primary key 
+- uniqueIndexes: array of unique indexes, helps SaveOrm determining whether to perform an update or an insert 
 - ?ric: array representing the ric fields (only for tables without primary keys, see the "Create or update?" section below) 
 - ?bindings: array of guest links  
         The concept of link is defined in the **save-orm.md** document.
@@ -124,17 +125,22 @@ Then comes the phase where we need to record the object into the database.
 The first question that arises is: is it a create or an update operation?
 
 Here is how we determine that.
+We basically try anything to make it an update, and ultimately fail to an insert.
 
 
 - if there is an auto-incremented column: 
-    - if the value already doesn't exist it's create, otherwise it's update    
+    - if the value already exist it's update,    
 - elseif there is a primary key:
     - it's an update if we can find a record with the primary key's current values,
-        otherwise it's a create
-- else, if there is no primary key, then the dev should set some fields that she considers to be
-        acting as a primary key (as for identifying a unique row).
-        Those fields are named ric. (see below how it looks in the config file) 
-- else, we have no choice but to query every columns        
+- elseif there are unique indexes:
+    - it's an update if we can find a record with any of the indexes,
+- elseif there is a ric (manually defined)
+    - it's an update if the ric values dig a record 
+- else
+    - if no auto-incremented column, no primary key, no unique indexes and no ric is defined, 
+        try one last time with all fields, or fail to an insert
+    - if either the auto-incremented column or the primary key or at least one unique index or the ric is defined,
+        fail to an insert                
         
         
 Example of generator config file:
