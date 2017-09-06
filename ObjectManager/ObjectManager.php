@@ -9,7 +9,6 @@ use OrmTools\Helper\OrmToolsHelper;
 use QuickPdo\QuickPdo;
 use QuickPdo\QuickPdoStmtTool;
 use SaveOrm\Exception\SaveException;
-use XiaoApi\Helper\QuickPdoStmtHelper\QuickPdoStmtHelper;
 
 class ObjectManager
 {
@@ -153,10 +152,32 @@ class ObjectManager
         $isCreate = ('insert' === $managerInfo['mode']);
         $whereSuccess = $managerInfo['whereSuccess'];
 
-
         //--------------------------------------------
         // NOW SAVE
         //--------------------------------------------
+        if (null === $managerInfo['where']) { // createUpdate
+            /**
+             * We need to check whether or not the record exist first,
+             * alike the createByXXX equivalent methods.
+             */
+            $identifiers = $this->getMostRelevantIdentifiers($info);
+            $where = array_intersect_key($values, array_flip($identifiers));
+            $key = key($where);
+
+            $markers = [];
+            $q = "select `$key` from `$table`";
+            $pdoWhere = QuickPdoStmtTool::simpleWhereToPdoWhere($where);
+            QuickPdoStmtTool::addWhereSubStmt($pdoWhere, $q, $markers);
+            $_row = QuickPdo::fetch($q, $markers);
+            if (false === $_row) {
+                $isCreate = true;
+            } else {
+                $isCreate = false;
+                $managerInfo['where'] = $where;
+            }
+        }
+
+
         if (
             true === $isCreate ||
             (false === $isCreate && false === $whereSuccess)
@@ -167,14 +188,7 @@ class ObjectManager
             }
         } else {
             $where = $managerInfo['where'];
-
-
-            if (null === $where) { // createUpdate
-                $identifiers = $this->getMostRelevantIdentifiers($info);
-                $where = array_intersect_key($values, array_flip($identifiers));
-            }
-
-            $pdoWhere = QuickPdoStmtHelper::simpleWhereToPdoWhere($where);
+            $pdoWhere = QuickPdoStmtTool::simpleWhereToPdoWhere($where);
 
             // filtering values, we only update the properties that the user set manually
             $changedProps = $managerInfo['changedProperties'];
@@ -399,7 +413,7 @@ class ObjectManager
         $anyField = current($cols);
         $q = "select `$anyField` from " . $table;
         $markers = [];
-        $pdoWhere = QuickPdoStmtHelper::simpleWhereToPdoWhere($where);
+        $pdoWhere = QuickPdoStmtTool::simpleWhereToPdoWhere($where);
         QuickPdoStmtTool::addWhereSubStmt($pdoWhere, $q, $markers);
         $row = QuickPdo::fetch($q, $markers);
         if (false !== $row) {
