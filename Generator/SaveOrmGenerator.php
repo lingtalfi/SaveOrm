@@ -793,7 +793,7 @@ class SaveOrmGenerator
                     $s .= $sp . '{' . PHP_EOL;
 
                     $s .= $sp2 . 'if (null === $' . $info['middleProp'] . ') {' . PHP_EOL;
-                    $s .= $sp3 . '$' . $info['middleProp'] . ' = ' . $info['middleClass'] . '::create();' . PHP_EOL;
+                    $s .= $sp3 . '$' . $info['middleProp'] . ' = ' . $info['middleClass'] . '::createUpdate();' . PHP_EOL;
                     $s .= $sp2 . '}' . PHP_EOL;
 
                     $s .= $sp2 . '$this->' . $col . '[] = $' . $info['singular'] . ';' . PHP_EOL;

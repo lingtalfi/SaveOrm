@@ -484,6 +484,10 @@ Related
 History Log
 ------------------    
     
+- 1.12.3 -- 2017-09-09
+
+    - fix SaveOrmGenerator's add method now use createUpdate as the default method for middle table
+    
 - 1.12.2 -- 2017-09-09
 
     - fix SaveOrmGenerator's bindings doublons
