@@ -81,7 +81,7 @@ class ObjectManager
      * This means internally, every save is operated with the doSave method.
      * The save method is just for the first call.
      */
-    private function doSave(\SaveOrm\Object\Object $object)
+    private function doSave(\SaveOrm\Object\Object $object, $saveType = null)
     {
         $info = $this->getInstanceInfo($object);
         $generalConfig = $this->getGeneralConfig();
@@ -177,7 +177,6 @@ class ObjectManager
         }
 
 
-
         if (
             true === $isCreate ||
             (false === $isCreate && false === $whereSuccess)
@@ -212,7 +211,11 @@ class ObjectManager
         } else {
             $ret = $values;
         }
-        $this->_saveResults[$table] = $ret;
+        if ('children' === $saveType) {
+            $this->_saveResults[$table][] = $ret;
+        } else {
+            $this->_saveResults[$table] = $ret;
+        }
 
         //--------------------------------------------
         // INJECTION (I don't remember why this is necessary)
@@ -282,15 +285,13 @@ class ObjectManager
                 $rightObjects = $object->$accessor();
                 foreach ($rightObjects as $rightObject) {
 
-                    $ret2 = $this->doSave($rightObject);
-                    $this->_saveResults[$rightTable] = $ret2;
+                    $this->doSave($rightObject, 'children');
 
 
                     $middleObject = $rightObject->_has_;
 
                     $middleInfo = $this->getInstanceInfo($middleObject);
                     $middleFKeys = $middleInfo['fks'];
-                    $middleTable = $middleInfo['table'];
 
 
                     // left injection on middle object
@@ -316,8 +317,7 @@ class ObjectManager
                         $this->saveError("Invalid middleLeftForeignKey: $middleRightForeignKey");
                     }
 
-                    $ret2 = $this->doSave($middleObject);
-                    $this->_saveResults[$middleTable] = $ret2;
+                    $this->doSave($middleObject, 'children');
 
                 }
             }

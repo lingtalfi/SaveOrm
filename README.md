@@ -484,6 +484,10 @@ Related
 History Log
 ------------------    
     
+- 1.12.4 -- 2017-09-09
+
+    - fix ObjectManager, save method now return a row per addXXX for children relationship
+    
 - 1.12.3 -- 2017-09-09
 
     - fix SaveOrmGenerator's add method now use createUpdate as the default method for middle table
