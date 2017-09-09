@@ -97,7 +97,7 @@ class ObjectManager
         $allPrefixes = (array_key_exists('tablePrefixes', $generalConfig)) ? $generalConfig['tablePrefixes'] : [];
         $managerInfo = $object->_getManagerInfo();
 
-
+a($table);
         //--------------------------------------------
         // SIBLINGS FIRST
         //--------------------------------------------
@@ -178,6 +178,7 @@ class ObjectManager
         }
 
 
+
         if (
             true === $isCreate ||
             (false === $isCreate && false === $whereSuccess)
@@ -239,20 +240,26 @@ class ObjectManager
                     // pass the newly created host data to the guest object
                     $guestInfo = $this->getInstanceInfo($guestObject);
                     $fks = $guestInfo['fks'];
-                    $fkInfo = $this->getForeignKeyInfoPointingTo($table, $fks, $guestTable, $guestColumn);
-                    list($foreignKey, $referencedKey) = $fkInfo;
-
+                    $fksInfo = $this->getForeignKeysInfoPointingTo($table, $fks, $guestTable, $guestColumn);
 
                     /**
                      * Injection, only if the value hasn't been set manually (or by using a createByXXX method)
                      */
                     $guestInfo = $guestObject->_getManagerInfo();
+
                     $guestChangedProps = $guestInfo['changedProperties'];
-                    if (!in_array($foreignKey, $guestChangedProps)) {
-                        $getMethod = $this->getMethodByProperty('get', $referencedKey);
-                        $setMethod = $this->getMethodByProperty('set', $foreignKey);
-                        $value = $object->$getMethod();
-                        $guestObject->$setMethod($value);
+                    foreach ($fksInfo as $fkInfo) {
+
+
+                        list($foreignKey, $referencedKey) = $fkInfo;
+
+
+                        if (!in_array($foreignKey, $guestChangedProps)) {
+                            $getMethod = $this->getMethodByProperty('get', $referencedKey);
+                            $setMethod = $this->getMethodByProperty('set', $foreignKey);
+                            $value = $object->$getMethod();
+                            $guestObject->$setMethod($value);
+                        }
                     }
 
                     $ret2 = $this->doSave($guestObject);
@@ -353,7 +360,7 @@ class ObjectManager
      * @param $sourceColumn
      * @return array [sourceColumn, referencedColumn]
      */
-    private function getForeignKeyInfoPointingTo($referencedTable, array $sourceForeignKeys, $sourceTable, $sourceColumn)
+    private function getForeignKeysInfoPointingTo($referencedTable, array $sourceForeignKeys, $sourceTable, $sourceColumn)
     {
         $tableFKeys = [];
         foreach ($sourceForeignKeys as $column => $fkInfo) {
@@ -369,13 +376,8 @@ class ObjectManager
                 $tableFKeys[] = $ret;
             }
         }
-        $n = count($tableFKeys);
 
-        if (1 === $n) {
-            return array_shift($tableFKeys);
-        } else {
-            $this->saveError("Ambiguous foreign key for table $sourceTable pointing to $referencedTable. sourceColumn $sourceColumn did not match any foreign key");
-        }
+        return $tableFKeys;
     }
 
 

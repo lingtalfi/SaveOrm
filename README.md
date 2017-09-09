@@ -484,6 +484,10 @@ Related
 History Log
 ------------------    
     
+- 1.12.2 -- 2017-09-09
+
+    - fix SaveOrmGenerator's bindings doublons
+    
 - 1.12.1 -- 2017-09-06
 
     - fix ObjectManager's handling of createUpdate (now can insert)

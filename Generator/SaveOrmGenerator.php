@@ -54,7 +54,7 @@ class SaveOrmGenerator
             $this->carriageReturn = '<br>';
         }
 
-//        $this->focus = "ek_product_lang";
+//        $this->focus = "ek_shop_has_product";
     }
 
 
@@ -389,7 +389,7 @@ class SaveOrmGenerator
     {
         $full = "$db.$table";
         if (array_key_exists($full, $this->_bindings)) {
-            return $this->_bindings[$full];
+            return array_unique($this->_bindings[$full]);
         }
         return [];
     }
