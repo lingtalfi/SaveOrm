@@ -97,7 +97,6 @@ class ObjectManager
         $allPrefixes = (array_key_exists('tablePrefixes', $generalConfig)) ? $generalConfig['tablePrefixes'] : [];
         $managerInfo = $object->_getManagerInfo();
 
-a($table);
         //--------------------------------------------
         // SIBLINGS FIRST
         //--------------------------------------------
