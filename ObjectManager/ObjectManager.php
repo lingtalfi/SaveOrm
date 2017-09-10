@@ -46,7 +46,6 @@ class ObjectManager
 //            a($this->_saveResults);
             throw $e;
         });
-
         return $ret;
     }
 
@@ -97,6 +96,7 @@ class ObjectManager
         $allPrefixes = (array_key_exists('tablePrefixes', $generalConfig)) ? $generalConfig['tablePrefixes'] : [];
         $managerInfo = $object->_getManagerInfo();
 
+
         //--------------------------------------------
         // SIBLINGS FIRST
         //--------------------------------------------
@@ -108,8 +108,7 @@ class ObjectManager
             if (method_exists($object, $siblingGetMethod)) {
                 $siblingObject = $object->$siblingGetMethod();
                 if (null !== $siblingObject) {
-                    $siblingRet = $this->doSave($siblingObject);
-                    $this->_saveResults[$siblingTable] = $siblingRet;
+                    $this->doSave($siblingObject);
 
                     // setting back the sibling value into the source object
                     $getter = $this->getMethodByProperty('get', $siblingColumn);
@@ -159,7 +158,8 @@ class ObjectManager
              * We need to check whether or not the record exist first,
              * alike the createByXXX equivalent methods.
              */
-            $identifiers = $this->getMostRelevantIdentifiers($info);
+            $identifierType = $managerInfo['identifierType'];
+            $identifiers = $this->getMostRelevantIdentifiers($info, $identifierType);
             $where = array_intersect_key($values, array_flip($identifiers));
             $key = key($where);
 
@@ -181,6 +181,7 @@ class ObjectManager
             true === $isCreate ||
             (false === $isCreate && false === $whereSuccess)
         ) {
+
             $ret = QuickPdo::insert($table, $values);
             if (null !== $ai && false !== $ret) {
                 $values[$ai] = (int)$ret;
@@ -200,22 +201,47 @@ class ObjectManager
         // RETURN VALUE
         //--------------------------------------------
         $ret = null;
-        if (null !== $ai) {
-            $ret = $values[$ai];
-        } elseif (count($primaryKey) > 0) {
-            $ret = array_intersect_key($values, array_flip($primaryKey));
-        } elseif (count($uniqueIndexes) > 0) {
-            $ret = array_intersect_key($values, array_flip($uniqueIndexes));
-        } elseif (count($ric) > 0) {
-            $ret = array_intersect_key($values, array_flip($ric));
+
+        $manInfo = $object->_getManagerInfo();
+        $idType = $manInfo['identifierType'];
+        if (null === $idType) {
+            if (null !== $ai) {
+                $ret = $values[$ai];
+            } elseif (count($primaryKey) > 0) {
+                $ret = array_intersect_key($values, array_flip($primaryKey));
+            } elseif (count($uniqueIndexes) > 0) {
+                $ret = array_intersect_key($values, array_flip(current($uniqueIndexes)));
+            } elseif (count($ric) > 0) {
+                $ret = array_intersect_key($values, array_flip($ric));
+            } else {
+                $ret = $values;
+            }
         } else {
-            $ret = $values;
+            switch ($idType) {
+                case "ai":
+                    $ret = $values[$ai];
+                    break;
+                case "pk":
+                    $ret = array_intersect_key($values, array_flip($primaryKey));
+                    break;
+                case "uq":
+                    $ret = array_intersect_key($values, array_flip(current($uniqueIndexes)));
+                    break;
+                case "ric":
+                    $ret = array_intersect_key($values, array_flip($ric));
+                    break;
+                case "pr":
+                    $ret = $values;
+                    break;
+                default:
+                    $this->saveError("Unknown identifier type: $idType");
+                    break;
+            }
         }
-        if ('children' === $saveType) {
-            $this->_saveResults[$table][] = $ret;
-        } else {
-            $this->_saveResults[$table] = $ret;
-        }
+
+
+        $this->_saveResults[$table][] = $ret;
+
 
         //--------------------------------------------
         // INJECTION (I don't remember why this is necessary)
@@ -264,8 +290,7 @@ class ObjectManager
                         }
                     }
 
-                    $ret2 = $this->doSave($guestObject);
-                    $this->_saveResults[$guestTable] = $ret2;
+                    $this->doSave($guestObject);
                 }
             }
         }
@@ -339,16 +364,39 @@ class ObjectManager
     }
 
 
-    private function getMostRelevantIdentifiers(array $info)
+    private function getMostRelevantIdentifiers(array $info, $identifierType = null)
     {
-        if (null !== $info['ai']) {
-            return [$info['ai']];
-        } elseif (count($info['primaryKey']) > 0) {
-            return $info['primaryKey'];
-        } elseif (count($info['uniqueIndexes']) > 0) {
-            return $info['uniqueIndexes'];
+        if (null !== $identifierType) {
+            switch ($identifierType) {
+                case "ai":
+                    return [$info['ai']];
+                    break;
+                case "pk":
+                    return $info['primaryKey'];
+                    break;
+                case "uq":
+                    return current($info['uniqueIndexes']);
+                    break;
+                case "ric":
+                    return $info['ric'];
+                    break;
+                case "pr":
+                    return $info['properties'];
+                    break;
+                default:
+                    $this->saveError("Unknown identifierType $identifierType");
+                    break;
+            }
+        } else {
+            if (null !== $info['ai']) {
+                return [$info['ai']];
+            } elseif (count($info['primaryKey']) > 0) {
+                return $info['primaryKey'];
+            } elseif (count($info['uniqueIndexes']) > 0) {
+                return current($info['uniqueIndexes']);
+            }
+            return $info['properties'];
         }
-        return $info['properties'];
     }
 
 

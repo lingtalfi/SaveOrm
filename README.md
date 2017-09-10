@@ -484,6 +484,11 @@ Related
 History Log
 ------------------    
     
+- 1.13.0 -- 2017-09-10
+
+    - ObjectManager.save's saveResults referenced variable now contains one array per table
+    - add Object.createUpdate identifierType argument
+    
 - 1.12.5 -- 2017-09-10
 
     - fix ObjectManager.getMostRelevantIdentifiers private method, return ai as an array

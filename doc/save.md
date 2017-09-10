@@ -171,7 +171,7 @@ which means it either succeeds, or fails (duplicate error) and throws an excepti
  
  
  
-But, sometimes value is missing...
+But, sometimes value is missing, meet the createUpdate method
 ===================================
 
 Our approach so far is not too bad and allows us to handle a few cases.
@@ -228,6 +228,45 @@ ProductObject::createByReference('product_ref')
 So again, the createUpdate method triggers the ProductLangObject into update mode,
 plus, since the ProductLang is a guest binding, it will receive the ProductObject.id value automatically
 (i.e. ProductLang->setProductId is called with the appropriate value).
+
+
+
+identifierType: control the most relevant identifiers
+------------------
+
+By default, when you use the createUpdate method, it will use what's called "the most relevant identifiers" to:
+
+- try fetching an existing record (to decide whether to perform an update or an insert)
+- return the result in the savedResults 
+
+
+"The most relevant identifiers" (mri) is an array of columns uniquely identifying any record in a table.
+To find the right mri, SaveOrm use this algorithm:
+
+- if the table has an auto-incremented field, mri is the auto-incremented field
+- else if the table has a primary key, mri is the primary key
+- else if the table has unique indexes, mri is the first unique index
+- else mri is the set of all columns
+
+
+Most of the time, this algorithm works fine, but you might find some edge cases where you need
+to define another mri.
+
+That's where the identifierType argument of the createUpdate method comes in.
+The identifierType, if defined, overrides the mri default algorithm.
+
+
+
+
+ 
+
+
+
+
+
+
+
+
 
 
  
