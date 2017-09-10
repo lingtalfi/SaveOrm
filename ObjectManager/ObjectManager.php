@@ -160,7 +160,6 @@ class ObjectManager
              * alike the createByXXX equivalent methods.
              */
             $identifiers = $this->getMostRelevantIdentifiers($info);
-            a($identifiers);
             $where = array_intersect_key($values, array_flip($identifiers));
             $key = key($where);
 
