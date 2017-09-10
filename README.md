@@ -484,6 +484,10 @@ Related
 History Log
 ------------------    
     
+- 1.12.5 -- 2017-09-10
+
+    - fix ObjectManager.getMostRelevantIdentifiers private method, return ai as an array
+    
 - 1.12.4 -- 2017-09-09
 
     - fix ObjectManager, save method now return a row per addXXX for children relationship

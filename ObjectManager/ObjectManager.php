@@ -160,6 +160,7 @@ class ObjectManager
              * alike the createByXXX equivalent methods.
              */
             $identifiers = $this->getMostRelevantIdentifiers($info);
+            a($identifiers);
             $where = array_intersect_key($values, array_flip($identifiers));
             $key = key($where);
 
@@ -342,7 +343,7 @@ class ObjectManager
     private function getMostRelevantIdentifiers(array $info)
     {
         if (null !== $info['ai']) {
-            return $info['ai'];
+            return [$info['ai']];
         } elseif (count($info['primaryKey']) > 0) {
             return $info['primaryKey'];
         } elseif (count($info['uniqueIndexes']) > 0) {
