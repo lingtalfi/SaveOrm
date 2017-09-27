@@ -428,6 +428,17 @@ UserObject::createByEmailShopId("email@gmail.com", 1);
 
 
 
+More info about the save method
+=================================
+
+There is more.
+Learn about the createUpdate method and the save mechanism in more depth
+by reading the [save document](https://github.com/lingtalfi/SaveOrm/blob/master/doc/save.md), and other documents in the doc directory.
+
+
+
+
+
 Known limitations
 =====================
 
