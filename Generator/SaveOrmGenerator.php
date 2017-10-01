@@ -489,11 +489,17 @@ class SaveOrmGenerator
 
 
         $colsInfo = $info->getColumnsInfo();
+        $tableProps = QuickPdoInfoTool::getColumnNames($table, $database);
 
 
         $sDefine = OrmToolsHelper::renderClassPropertiesDeclaration($colsInfo);
         $sConstructor = OrmToolsHelper::renderConstructorInit($colsInfo);
-        $sAccessors = $this->computeAccessors($colsInfo);
+        $sp = str_repeat(' ', 8);
+        $sConstructor .= PHP_EOL;
+        $sConstructor .= $sp . '$this->_tableProps = ' . ArrayToStringTool::toPhpArray($tableProps, false, 8) . ';' . PHP_EOL;
+
+
+        $sAccessors = $this->computeAccessors($colsInfo, $tableProps);
         $sUse = OrmToolsHelper::renderStatements($info->getStatements());
 
 
@@ -673,14 +679,13 @@ class SaveOrmGenerator
                 $s .= $sp2 . '$ret = self::create();' . PHP_EOL;
                 $s .= $sp2 . '$ret->_mode = \'update\';' . PHP_EOL;
 
-                $s .= $sp2 . '$params = [' . PHP_EOL;
+                $s .= $sp2 . '$ret->_where = [' . PHP_EOL;
                 foreach ($cols as $col) {
                     $s .= $sp3 . "'$col' => \$$col," . PHP_EOL;
                 }
                 $s .= $sp2 . '];' . PHP_EOL;
-                $s .= $sp2 . '$ret->_where = $params;' . PHP_EOL;
 
-                $s .= $sp2 . '$row = QuickPdo::fetch("select * from `' . $table . '` where ';
+                $s .= $sp2 . '$ret->_whereQuery = "select * from `' . $table . '` where ';
                 $c = 0;
                 foreach ($cols as $col) {
                     if (0 !== $c++) {
@@ -688,21 +693,8 @@ class SaveOrmGenerator
                     }
                     $s .= '`' . $col . '`=:' . $col;
                 }
-                $s .= '", $params);' . PHP_EOL;
-                $s .= $sp2 . 'if (false !== $row) {' . PHP_EOL;
-                foreach ($columns as $col) {
-                    $pascal = CaseTool::snakeToFlexiblePascal($col);
-                    $s .= $sp3 . '$ret->set' . $pascal . '($row["' . $col . '"]);' . PHP_EOL;
-                }
-                $s .= $sp3 . '$ret->_whereSuccess = true;' . PHP_EOL;
+                $s .= '";' . PHP_EOL;
 
-                $s .= $sp2 . '} else {' . PHP_EOL;
-                foreach ($cols as $col) {
-                    $pascal = CaseTool::snakeToFlexiblePascal($col);
-                    $s .= $sp3 . '$ret->set' . $pascal . '($' . $col . ');' . PHP_EOL;
-                }
-                $s .= $sp3 . '$ret->_whereSuccess = false;' . PHP_EOL;
-                $s .= $sp2 . '}' . PHP_EOL;
                 $s .= $sp2 . 'return $ret;' . PHP_EOL;
                 $s .= $sp . '}' . PHP_EOL;
                 $s .= PHP_EOL;
@@ -754,7 +746,7 @@ class SaveOrmGenerator
     }
 
 
-    private function computeAccessors(array $colsInfo)
+    private function computeAccessors(array $colsInfo, array $tableProps)
     {
         $s = '' . PHP_EOL;
         $sp = str_repeat(' ', 4);
@@ -772,7 +764,13 @@ class SaveOrmGenerator
             if (null !== $hint) {
                 OrmToolsHelper::renderHint($s, $hint, $sp, 'return');
             }
-            $s .= OrmToolsHelper::renderGetMethod($col, $hint);
+            if (in_array($col, $tableProps)) {
+                $s .= OrmToolsHelper::renderGetMethod($col, $hint, [
+                    'beforeReturn' => '$this->_resolveUpdate();',
+                ]);
+            } else {
+                $s .= OrmToolsHelper::renderGetMethod($col, $hint);
+            }
 
 
             // setter

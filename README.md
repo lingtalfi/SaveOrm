@@ -495,6 +495,10 @@ Related
 History Log
 ------------------    
     
+- 1.13.1 -- 2017-10-01
+
+    - fix save system, now uses lazy resolveUpdate: now every children's whereSuccess is checked
+    
 - 1.13.0 -- 2017-09-10
 
     - ObjectManager.save's saveResults referenced variable now contains one array per table

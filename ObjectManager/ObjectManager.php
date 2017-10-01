@@ -150,6 +150,7 @@ class ObjectManager
         $isCreate = ('insert' === $managerInfo['mode']);
         $whereSuccess = $managerInfo['whereSuccess'];
 
+
         //--------------------------------------------
         // NOW SAVE
         //--------------------------------------------
@@ -181,8 +182,16 @@ class ObjectManager
             true === $isCreate ||
             (false === $isCreate && false === $whereSuccess)
         ) {
-
+            if('ekev_course' === $table){
+                echo '<hr>';
+                a($table, $values, $isCreate, $whereSuccess, $managerInfo);
+            }
             $ret = QuickPdo::insert($table, $values);
+            if('ekev_course' === $table){
+
+            a("done");
+            }
+
             if (null !== $ai && false !== $ret) {
                 $values[$ai] = (int)$ret;
             }
@@ -308,6 +317,10 @@ class ObjectManager
             $accessor = $this->getMethodByTable("get", $rightTablePlural, $allPrefixes);
             if (method_exists($object, $accessor)) {
                 $rightObjects = $object->$accessor();
+
+
+
+
                 foreach ($rightObjects as $rightObject) {
 
                     $this->doSave($rightObject, 'children');
