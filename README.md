@@ -495,6 +495,10 @@ Related
 History Log
 ------------------    
     
+- 1.14.0 -- 2017-10-06
+
+    - add Object.createByArray method
+    
 - 1.13.1 -- 2017-10-01
 
     - fix save system, now uses lazy resolveUpdate: now every children's whereSuccess is checked
