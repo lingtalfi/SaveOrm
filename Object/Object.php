@@ -47,6 +47,7 @@ class Object
                 $this->$setMethod($info[$prop]);
             }
         }
+        return $this;
     }
 
     /**

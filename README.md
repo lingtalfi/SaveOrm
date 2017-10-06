@@ -495,6 +495,10 @@ Related
 History Log
 ------------------    
     
+- 1.15.1 -- 2017-10-06
+
+    - fix Object.feedByArray method now return self
+    
 - 1.15.0 -- 2017-10-06
 
     - add Object.feedByArray method
