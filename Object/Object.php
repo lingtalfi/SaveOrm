@@ -39,6 +39,16 @@ class Object
         return $o;
     }
 
+    public function feedByArray(array $info)
+    {
+        foreach ($this->_tableProps as $prop) {
+            if (array_key_exists($prop, $info)) {
+                $setMethod = "set" . SaveOrmGeneratorHelper::toPascal($prop);
+                $this->$setMethod($info[$prop]);
+            }
+        }
+    }
+
     /**
      * @param $identifierType string|null,
      *              - ai: auto-incremented field

@@ -495,6 +495,10 @@ Related
 History Log
 ------------------    
     
+- 1.15.0 -- 2017-10-06
+
+    - add Object.feedByArray method
+    
 - 1.14.1 -- 2017-10-06
 
     - fix Object.createByArray method, now is static
