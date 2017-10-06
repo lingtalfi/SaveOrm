@@ -27,14 +27,16 @@ class Object
     }
 
 
-    public function createByArray(array $info)
+    public static function createByArray(array $info)
     {
-        foreach ($this->_tableProps as $prop) {
+        $o = new static();
+        foreach ($o->_tableProps as $prop) {
             if (array_key_exists($prop, $info)) {
                 $setMethod = "set" . SaveOrmGeneratorHelper::toPascal($prop);
-                $this->$setMethod($info[$prop]);
+                $o->$setMethod($info[$prop]);
             }
         }
+        return $o;
     }
 
     /**
