@@ -495,6 +495,10 @@ Related
 History Log
 ------------------    
     
+- 1.15.2 -- 2017-10-09
+
+    - fix Object._resolveUpdate overriding user defined values
+    
 - 1.15.1 -- 2017-10-06
 
     - fix Object.feedByArray method now return self

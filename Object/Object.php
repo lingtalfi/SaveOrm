@@ -102,14 +102,18 @@ class Object
             $row = QuickPdo::fetch($this->_whereQuery, $params);
             if (false !== $row) {
                 foreach ($this->_tableProps as $prop) {
-                    $set = "set" . SaveOrmGeneratorHelper::toPascal($prop);
-                    $this->$set($row[$prop]);
+                    if (!in_array($prop, $this->_changedProperties)) {
+                        $set = "set" . SaveOrmGeneratorHelper::toPascal($prop);
+                        $this->$set($row[$prop]);
+                    }
                 }
                 $this->_whereSuccess = true;
             } else {
                 foreach ($params as $key => $param) {
-                    $set = "set" . SaveOrmGeneratorHelper::toPascal($key);
-                    $this->$set($param);
+                    if (!in_array($key, $this->_changedProperties)) {
+                        $set = "set" . SaveOrmGeneratorHelper::toPascal($key);
+                        $this->$set($param);
+                    }
                 }
                 $this->_whereSuccess = false;
             }
