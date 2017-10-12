@@ -182,16 +182,7 @@ class ObjectManager
             true === $isCreate ||
             (false === $isCreate && false === $whereSuccess)
         ) {
-            if('ekev_course' === $table){
-                echo '<hr>';
-                a($table, $values, $isCreate, $whereSuccess, $managerInfo);
-            }
             $ret = QuickPdo::insert($table, $values);
-            if('ekev_course' === $table){
-
-            a("done");
-            }
-
             if (null !== $ai && false !== $ret) {
                 $values[$ai] = (int)$ret;
             }
