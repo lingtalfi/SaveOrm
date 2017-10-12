@@ -495,6 +495,10 @@ Related
 History Log
 ------------------    
     
+- 1.17.1 -- 2017-10-12
+
+    - fix ObjectManager.save not returning all the values representing the object with insert
+    
 - 1.17.0 -- 2017-10-12
 
     - update ObjectManager.save, now return all the values representing the object

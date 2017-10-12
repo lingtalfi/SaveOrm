@@ -222,25 +222,7 @@ class ObjectManager
         //--------------------------------------------
         // RETURN VALUE
         //--------------------------------------------
-        $ret = null;
-
-        $manInfo = $object->_getManagerInfo();
-        $idType = $manInfo['identifierType'];
-        if (null === $idType) {
-            if (null !== $ai) {
-                $ret = $values[$ai];
-            } elseif (count($primaryKey) > 0) {
-                $ret = array_intersect_key($values, array_flip($primaryKey));
-            } elseif (count($uniqueIndexes) > 0) {
-                $ret = array_intersect_key($values, array_flip(current($uniqueIndexes)));
-            } elseif (count($ric) > 0) {
-                $ret = array_intersect_key($values, array_flip($ric));
-            } else {
-                $ret = $values;
-            }
-        } else {
-            $ret = $values;
-        }
+        $ret = $values;
 
 
         $this->_saveResults[$table][] = $ret;
