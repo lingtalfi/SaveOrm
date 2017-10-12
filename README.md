@@ -495,6 +495,10 @@ Related
 History Log
 ------------------    
     
+- 1.17.0 -- 2017-10-12
+
+    - update ObjectManager.save, now return all the values representing the object
+    
 - 1.16.0 -- 2017-10-12
 
     - add ObjectManager debugSql mode

@@ -239,30 +239,7 @@ class ObjectManager
                 $ret = $values;
             }
         } else {
-            switch ($idType) {
-                case "ai":
-                    $ret = $values[$ai];
-                    break;
-                case "pk":
-                    $ret = array_intersect_key($values, array_flip($primaryKey));
-                    break;
-                case "uq":
-                    $ret = array_intersect_key($values, array_flip(current($uniqueIndexes)));
-                    break;
-                case "ric":
-                    $ret = array_intersect_key($values, array_flip($ric));
-                    break;
-                case "pr":
-                    $ret = $values;
-                    break;
-                case "prm":
-                    $ret = $values;
-                    $ret = array_diff_key($ret, array_flip($primaryKey));
-                    break;
-                default:
-                    $this->saveError("Unknown identifier type: $idType");
-                    break;
-            }
+            $ret = $values;
         }
 
 
