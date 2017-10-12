@@ -495,6 +495,13 @@ Related
 History Log
 ------------------    
     
+- 1.16.0 -- 2017-10-12
+
+    - add ObjectManager debugSql mode
+    - fix ObjectManager.save complaining when nullable fk is null
+    - add ObjectManager prm identifier type
+    - fix createUpdate not working properly (complaining about unresolved keys that it should have resolved automatically)
+    
 - 1.15.2 -- 2017-10-09
 
     - fix Object._resolveUpdate overriding user defined values

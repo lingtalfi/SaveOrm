@@ -13,6 +13,8 @@ use SaveOrm\Exception\SaveException;
 class ObjectManager
 {
 
+    public static $debugSql = false;
+
 
     // contextual
     private $_savedObject;
@@ -30,11 +32,9 @@ class ObjectManager
         return new static();
     }
 
-
     /**
      * see save.md for details about this method
      */
-
     public function save(\SaveOrm\Object\Object $object)
     {
         $ret = null;
@@ -86,6 +86,7 @@ class ObjectManager
         $generalConfig = $this->getGeneralConfig();
         $table = $info['table'];
         $properties = $info['properties'];
+        $nullables = $info['nullables'];
         $foreignKeys = $info['fks'];
         $ai = $info['ai'];
         $uniqueIndexes = $info['uniqueIndexes'];
@@ -133,7 +134,7 @@ class ObjectManager
             $value = $object->$method();
 
             // unresolved foreign keys?
-            if (true === $this->isForeignKey($prop, $foreignKeys) && null === $value) {
+            if (true === $this->isForeignKey($prop, $foreignKeys) && null === $value && false === in_array($prop, $nullables)) {
                 $this->saveError("Unresolved foreign key for table $table, column $prop");
             }
             $values[$prop] = $value;
@@ -162,18 +163,28 @@ class ObjectManager
             $identifierType = $managerInfo['identifierType'];
             $identifiers = $this->getMostRelevantIdentifiers($info, $identifierType);
             $where = array_intersect_key($values, array_flip($identifiers));
-            $key = key($where);
 
+
+            $key = key($where);
             $markers = [];
-            $q = "select `$key` from `$table`";
+            $q = "select * from `$table`";
             $pdoWhere = QuickPdoStmtTool::simpleWhereToPdoWhere($where);
             QuickPdoStmtTool::addWhereSubStmt($pdoWhere, $q, $markers);
             $_row = QuickPdo::fetch($q, $markers);
+
             if (false === $_row) {
                 $isCreate = true;
             } else {
+
+                /**
+                 * updating values.
+                 * We need to update values to fill the object with all the values it needs
+                 * for the inferring/injection phase.
+                 */
+                $values = $_row;
+
                 $isCreate = false;
-                $managerInfo['where'] = $where;
+                $managerInfo['where'] = $where; // updating where
             }
         }
 
@@ -182,6 +193,11 @@ class ObjectManager
             true === $isCreate ||
             (false === $isCreate && false === $whereSuccess)
         ) {
+            if (true === self::$debugSql) {
+                a("[ObjectManagerDebug]: insert in $table, with values:");
+                a($values);
+            }
+
             $ret = QuickPdo::insert($table, $values);
             if (null !== $ai && false !== $ret) {
                 $values[$ai] = (int)$ret;
@@ -193,6 +209,12 @@ class ObjectManager
             // filtering values, we only update the properties that the user set manually
             $changedProps = $managerInfo['changedProperties'];
             $updateValues = array_intersect_key($values, array_flip($changedProps));
+            if (true === self::$debugSql) {
+                a("[ObjectManagerDebug]: update $table, with values and where:");
+                a($values);
+                a($pdoWhere);
+            }
+
             QuickPdo::update($table, $updateValues, $pdoWhere);
 
         }
@@ -233,6 +255,10 @@ class ObjectManager
                 case "pr":
                     $ret = $values;
                     break;
+                case "prm":
+                    $ret = $values;
+                    $ret = array_diff_key($ret, array_flip($primaryKey));
+                    break;
                 default:
                     $this->saveError("Unknown identifier type: $idType");
                     break;
@@ -269,13 +295,13 @@ class ObjectManager
                     $guestInfo = $this->getInstanceInfo($guestObject);
                     $fks = $guestInfo['fks'];
                     $fksInfo = $this->getForeignKeysInfoPointingTo($table, $fks, $guestTable, $guestColumn);
-
                     /**
                      * Injection, only if the value hasn't been set manually (or by using a createByXXX method)
                      */
                     $guestInfo = $guestObject->_getManagerInfo();
 
                     $guestChangedProps = $guestInfo['changedProperties'];
+
                     foreach ($fksInfo as $fkInfo) {
 
 
@@ -308,8 +334,6 @@ class ObjectManager
             $accessor = $this->getMethodByTable("get", $rightTablePlural, $allPrefixes);
             if (method_exists($object, $accessor)) {
                 $rightObjects = $object->$accessor();
-
-
 
 
                 foreach ($rightObjects as $rightObject) {
@@ -386,6 +410,9 @@ class ObjectManager
                     break;
                 case "pr":
                     return $info['properties'];
+                    break;
+                case "prm":
+                    return array_diff($info['properties'], $info['primaryKey']);
                     break;
                 default:
                     $this->saveError("Unknown identifierType $identifierType");
