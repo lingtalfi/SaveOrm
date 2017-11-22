@@ -178,6 +178,7 @@ class ObjectManager
              */
             $identifierType = $managerInfo['identifierType'];
             $identifiers = $this->getMostRelevantIdentifiers($info, $identifierType, $values, $object);
+
             $where = array_intersect_key($values, array_flip($identifiers));
 
 
@@ -192,13 +193,23 @@ class ObjectManager
             if (false === $_row) {
                 $isCreate = true;
                 $whereSuccess = false;
+                $managerInfo['_whereValues'] = $values;
             } else {
 
                 /**
                  * updating values.
                  * We need to update values to fill the object with all the values it needs
                  * for the inferring/injection phase.
+                 *
+                 * Generally, we try to get a record from a minimum set of data (for instance only
+                 * from the primary key).
+                 * However, with the createUpdateByArray method, the approach is different, more like a brute
+                 * force technique where the dev sets the object with all the properties she/he's got,
+                 * hoping for a match.
+                 * That's why the values are in the second argument of the following array_replace statement:
+                 * to ensure that the values set by the dev aren't overridden by a potentially empty record.
                  */
+                $managerInfo['_whereValues_'] = array_replace($_row, $values);
                 $values = $_row;
                 $whereSuccess = true;
                 $isCreate = false;
@@ -224,15 +235,23 @@ class ObjectManager
             $pdoWhere = QuickPdoStmtTool::simpleWhereToPdoWhere($where);
 
             // filtering values, we only update the properties that the user set manually
+
             $changedProps = $managerInfo['changedProperties'];
-            $updateValues = array_intersect_key($values, array_flip($changedProps));
+            $updateValues = array_intersect_key($managerInfo["_whereValues_"], array_flip($changedProps));
+
             if (true === self::$debugSql) {
                 a("[ObjectManagerDebug]: update $table, with values and where:");
                 a($values);
                 a($pdoWhere);
             }
 
+
             QuickPdo::update($table, $updateValues, $pdoWhere);
+
+            /**
+             * Need this line to be consistent with the _whereValues_ system tried above.
+             */
+            $values = array_replace($values, $updateValues);
 
         }
 

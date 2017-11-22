@@ -495,6 +495,10 @@ Related
 History Log
 ------------------    
     
+- 1.18.1 -- 2017-11-22
+
+    - fix ObjectManager not handling the implementation of createUpdateByArray correctly 
+    
 - 1.18.0 -- 2017-11-22
 
     - update Object.createUpdateByArray method
