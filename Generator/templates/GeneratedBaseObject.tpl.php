@@ -1,11 +1,11 @@
 <?php
 
 
-namespace SaveOrm\Test;
+namespace Ling\SaveOrm\Test;
 
 
-use SaveOrm\Object\Object;
-use SaveOrm\Test\GeneratedObjectManager;
+use Ling\SaveOrm\Object\Object;
+use Ling\SaveOrm\Test\GeneratedObjectManager;
 
 
 class CoumeGeneratedBaseObject extends Object

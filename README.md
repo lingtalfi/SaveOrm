@@ -17,7 +17,7 @@ Install
 ==========
 Using the [uni](https://github.com/lingtalfi/universe-naive-importer) command.
 ```bash
-uni import SaveOrm
+uni import Ling/SaveOrm
 ```
 
 Or just download it and place it where you want otherwise.
@@ -184,7 +184,7 @@ Here is the code required to generate the orm structure.
 
 
 use Core\Services\A;
-use SaveOrm\Generator\SaveOrmGenerator;
+use Ling\SaveOrm\Generator\SaveOrmGenerator;
 
 // initialize your framework (autoloader...)
 require_once __DIR__ . "/../../boot.php";

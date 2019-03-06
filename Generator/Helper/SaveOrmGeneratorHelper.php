@@ -1,9 +1,9 @@
 <?php
 
 
-namespace SaveOrm\Generator\Helper;
+namespace Ling\SaveOrm\Generator\Helper;
 
-use Bat\CaseTool;
+use Ling\Bat\CaseTool;
 
 class SaveOrmGeneratorHelper
 {

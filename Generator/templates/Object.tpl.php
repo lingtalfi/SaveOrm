@@ -1,7 +1,7 @@
 <?php
 
 
-namespace SaveOrm\Object\Ekev;
+namespace Ling\SaveOrm\Object\Ekev;
 
 
 // use

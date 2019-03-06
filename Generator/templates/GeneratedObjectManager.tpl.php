@@ -1,9 +1,9 @@
 <?php
 
 
-namespace SaveOrm\TEST;
+namespace Ling\SaveOrm\TEST;
 
-use SaveOrm\ObjectManager\ObjectManager;
+use Ling\SaveOrm\ObjectManager\ObjectManager;
 
 class ChoumGeneratedObjectManager extends ObjectManager
 {

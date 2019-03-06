@@ -1,14 +1,14 @@
 <?php
 
 
-namespace SaveOrm\ObjectManager;
+namespace Ling\SaveOrm\ObjectManager;
 
 
-use Bat\CaseTool;
-use OrmTools\Helper\OrmToolsHelper;
-use QuickPdo\QuickPdo;
-use QuickPdo\QuickPdoStmtTool;
-use SaveOrm\Exception\SaveException;
+use Ling\Bat\CaseTool;
+use Ling\OrmTools\Helper\OrmToolsHelper;
+use Ling\QuickPdo\QuickPdo;
+use Ling\QuickPdo\QuickPdoStmtTool;
+use Ling\SaveOrm\Exception\SaveException;
 
 class ObjectManager
 {

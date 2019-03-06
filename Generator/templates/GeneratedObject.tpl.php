@@ -1,12 +1,12 @@
 <?php
 
 
-namespace SaveOrm\Object\Ekev;
+namespace Ling\SaveOrm\Object\Ekev;
 
 
 
-use QuickPdo\QuickPdo;
-use SaveOrm\Test\GeneratedBaseObject;
+use Ling\QuickPdo\QuickPdo;
+use Ling\SaveOrm\Test\GeneratedBaseObject;
 
 // use
 

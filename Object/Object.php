@@ -1,11 +1,11 @@
 <?php
 
 
-namespace SaveOrm\Object;
+namespace Ling\SaveOrm\Object;
 
-use QuickPdo\QuickPdo;
-use SaveOrm\Generator\Helper\SaveOrmGeneratorHelper;
-use SaveOrm\ObjectManager\ObjectManager;
+use Ling\QuickPdo\QuickPdo;
+use Ling\SaveOrm\Generator\Helper\SaveOrmGeneratorHelper;
+use Ling\SaveOrm\ObjectManager\ObjectManager;
 
 /**
  * This is the base object extended by all saveOrm objects.

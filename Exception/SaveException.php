@@ -1,7 +1,7 @@
 <?php
 
 
-namespace SaveOrm\Exception;
+namespace Ling\SaveOrm\Exception;
 
 
 class SaveException extends SaveOrmException

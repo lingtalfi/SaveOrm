@@ -1,17 +1,17 @@
 <?php
 
 
-namespace SaveOrm\Generator;
+namespace Ling\SaveOrm\Generator;
 
 
-use ArrayToString\ArrayToStringTool;
-use Bat\CaseTool;
-use Bat\FileSystemTool;
-use OrmTools\Helper\OrmToolsHelper;
-use QuickPdo\QuickPdoInfoTool;
-use SaveOrm\Exception\GeneratorException;
-use SaveOrm\Generator\Helper\SaveOrmGeneratorHelper;
-use SaveOrm\Generator\Info\SaveOrmGeneratorInfo;
+use Ling\ArrayToString\ArrayToStringTool;
+use Ling\Bat\CaseTool;
+use Ling\Bat\FileSystemTool;
+use Ling\OrmTools\Helper\OrmToolsHelper;
+use Ling\QuickPdo\QuickPdoInfoTool;
+use Ling\SaveOrm\Exception\GeneratorException;
+use Ling\SaveOrm\Generator\Helper\SaveOrmGeneratorHelper;
+use Ling\SaveOrm\Generator\Info\SaveOrmGeneratorInfo;
 
 class SaveOrmGenerator
 {

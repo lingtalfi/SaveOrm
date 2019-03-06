@@ -1,12 +1,12 @@
 <?php
 
 
-namespace SaveOrm\Generator\Info;
+namespace Ling\SaveOrm\Generator\Info;
 
-use OrmTools\Helper\OrmToolsHelper;
-use QuickPdo\QuickPdoInfoTool;
-use SaveOrm\Exception\GeneratorException;
-use SaveOrm\Generator\Helper\SaveOrmGeneratorHelper;
+use Ling\OrmTools\Helper\OrmToolsHelper;
+use Ling\QuickPdo\QuickPdoInfoTool;
+use Ling\SaveOrm\Exception\GeneratorException;
+use Ling\SaveOrm\Generator\Helper\SaveOrmGeneratorHelper;
 
 class SaveOrmGeneratorInfo
 {
